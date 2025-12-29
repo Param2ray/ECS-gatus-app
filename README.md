@@ -1,4 +1,4 @@
-# ECS-gatus-app
+# Ecs-Production-Healthcheck-Service
 
 ### This project is part of an end-to-end ECS deployment exercise.
 The first step focuses on building and validating a minimal application
