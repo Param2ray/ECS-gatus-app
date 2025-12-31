@@ -15,7 +15,7 @@ A lightweight Flask application exposing a `/health` endpoint.
 {"status":"ok"}
 
 python health.py
-curl http://localhost:5002/health
+curl http://localhost:80/health
 
 {"status":"ok"}
 
