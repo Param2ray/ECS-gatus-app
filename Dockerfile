@@ -26,7 +26,7 @@ USER nonroot
 
 COPY --from=build /health /health
 
-EXPOSE 8080
+EXPOSE 80
 
 CMD ["python", "health.py"]
 
