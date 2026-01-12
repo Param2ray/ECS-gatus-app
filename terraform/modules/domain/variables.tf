@@ -3,7 +3,7 @@ variable "alb_dns" {
   type        = string
 }
 
-variable "zone_id" {
+variable "cloudflare_zone_id" {
   description = "Cloudflare Hosted Zone ID"
   type        = string
 }
@@ -16,4 +16,10 @@ variable "subdomain" {
 variable "record_type" {
   type    = string
   default = "CNAME"
-} 
+}
+
+variable "time_to_live" {
+  type        = number
+  description = "Time to Live"
+  default     = 300
+}

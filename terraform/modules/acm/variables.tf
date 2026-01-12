@@ -3,8 +3,8 @@ variable "domain_name" {
   type        = string
 }
 
-variable "zone_id" {
-  description = "Cloudflare Hosted Zone ID"
+variable "cloudflare_zone_id" {
+  description = "The Cloudflare zone ID"
   type        = string
 }
 
@@ -12,3 +12,10 @@ variable "subdomain" {
   description = "Subdomain for ACM certificate"
   type        = string
 }
+
+variable "ttl" {
+  description = "TTL for ACM validation DNS record"
+  type        = number
+  default     = 300
+}
+

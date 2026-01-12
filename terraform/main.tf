@@ -13,8 +13,9 @@ module "acm" {
   source = "./modules/acm"
 
   domain_name = var.domain_name
-  zone_id     = var.zone_id
   subdomain   = var.subdomain
+  ttl         = var.ttl
+  zone_id     = var.cloudflare_zone_id
 }
 
 module "alb" {
@@ -25,8 +26,8 @@ module "alb" {
   public_subnet_ids   = module.vpc.public_subnet_ids
   http_listener_port  = var.http_listener_port
   https_listener_port = var.https_listener_port
-  certificate_arn     = module.acm.certificate_arn
-  target_port         = var.container_port
+  certificate_arn     = module.acm.acm_certificate_arn
+  container_port      = var.container_port
 }
 
 module "iam" {
@@ -63,7 +64,8 @@ module "ecs" {
 module "domain" {
   source = "./modules/domain"
 
-  alb_dns   = module.alb.alb_dns_name
-  zone_id   = var.zone_id
-  subdomain = var.subdomain
+  alb_dns            = module.alb.alb_dns_name
+  cloudflare_zone_id = var.cloudflare_zone_id
+  subdomain          = var.subdomain
 }
+ 

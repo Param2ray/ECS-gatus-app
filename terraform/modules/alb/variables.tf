@@ -13,7 +13,6 @@ variable "public_subnet_ids" {
   type        = list(string)
 }
 
-
 variable "http_listener_port" {
   description = "HTTP listener port"
   type        = number
@@ -27,7 +26,12 @@ variable "https_listener_port" {
 }
 
 variable "container_port" {
-  description = "Container port for ECS service"
+  description = "Target port for the application (e.g., ECS task port)"
   type        = number
   default     = 8080
+}
+
+variable "certificate_arn" {
+  description = "ARN of the SSL certificate from ACM"
+  type        = string
 }

@@ -32,8 +32,19 @@ variable "domain_name" {
   type        = string
 }
 
-variable "zone_id" {
-  description = "Cloudflare Hosted Zone ID"
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token with DNS edit permissions"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_zone_id" {
+  description = "Cloudflare Zone ID"
+  type        = string
+}
+
+variable "cloudflare_account_id" {
+  description = "The Cloudflare Account ID"
   type        = string
 }
 
