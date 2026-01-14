@@ -17,7 +17,7 @@ resource "cloudflare_dns_record" "acm_cert_validation" {
     }
   }
 
-  cloudflare_zone_id = var.cloudflare_zone_id
+  zone_id = var.cloudflare_zone_id
   name               = each.value.name
   type               = each.value.type
   content            = each.value.content

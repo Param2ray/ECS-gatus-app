@@ -12,10 +12,10 @@ module "vpc" {
 module "acm" {
   source = "./modules/acm"
 
-  domain_name = var.domain_name
-  subdomain   = var.subdomain
-  ttl         = var.ttl
-  zone_id     = var.cloudflare_zone_id
+  domain_name        = var.domain_name
+  subdomain          = var.subdomain
+  ttl                = var.ttl
+  cloudflare_zone_id = var.cloudflare_zone_id
 }
 
 module "alb" {
@@ -32,8 +32,6 @@ module "alb" {
 
 module "iam" {
   source = "./modules/iam"
-
-  name = var.name
 }
 
 module "ecr" {
@@ -59,6 +57,7 @@ module "ecs" {
   private_subnet_ids    = module.vpc.private_subnet_ids
   target_group_arn      = module.alb.target_group_arn
   alb_security_group_id = module.alb.alb_security_group_id
+  task_name             = var.task_name
 }
 
 module "domain" {

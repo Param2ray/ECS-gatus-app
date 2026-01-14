@@ -107,3 +107,14 @@ variable "image_tag" {
   type        = string
   default     = "latest"
 }
+
+variable "ttl" {
+  type        = number
+  description = "DNS record TTL"
+  default     = 300
+}
+
+variable "task_name" {
+  description = "ECS task definition name"
+  type        = string
+}
