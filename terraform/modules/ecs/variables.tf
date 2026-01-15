@@ -77,3 +77,9 @@ variable "task_name" {
   type        = string
  
 }
+
+
+variable "container_name" {
+  description = "Name which you want to name your container"
+  type        = string
+}

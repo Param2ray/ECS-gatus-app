@@ -7,7 +7,8 @@ resource "aws_security_group" "ecs_sg" {
         from_port   = var.container_port
         to_port     = var.container_port
         protocol    = "tcp"
-        security_groups = [aws_security_group.sg_alb.id]
+        security_groups = [var.alb_security_group_id]
+
     }
     egress {
         from_port   = 0
@@ -18,7 +19,7 @@ resource "aws_security_group" "ecs_sg" {
 }
 
 # Create an ECS cluster
-resource "aws_ecs_cluster" "project_cluster" {
+resource "aws_ecs_cluster" "ecs_cluster" {
   name = var.cluster_name
   setting {
     name  = "containerInsights"
@@ -62,17 +63,14 @@ resource "aws_ecs_service" "ecs_service" {
 
     network_configuration {
         subnets         = var.private_subnet_ids
-        security_groups = [ecs_security_group.ecs_sg.id]
+        security_groups = [aws_security_group.ecs_sg.id]
         assign_public_ip = false
     }
 
     load_balancer {
-        target_group_arn = var.target_group_arn
         container_name   = var.container_name
         container_port   = var.container_port
     }
-
-    depends_on = [aws_lb_listener.http_listener, aws_lb_listener.https_listener]
     tags = {
         Name = "Project_ecs_service"
     }  

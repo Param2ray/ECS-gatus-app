@@ -23,3 +23,8 @@ variable "time_to_live" {
   description = "Time to Live"
   default     = 300
 }
+
+variable "zone_name" {
+  description = "Base domain name"
+  type        = string
+}

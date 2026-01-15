@@ -18,7 +18,8 @@ output "https_listener_arn" {
   value       = aws_lb_listener.https.arn
 }
 
-output "alb_security_group_id" {
-  description = "The ID of the security group associated with the ALB"
-  value       = aws_security_group.sg_alb.id
+output "alb_sg_id" {
+  description = "ALB Security Group ID"
+  value = aws_security_group.sg_alb.id
 }
+

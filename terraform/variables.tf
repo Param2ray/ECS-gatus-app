@@ -15,6 +15,11 @@ variable "az_count" {
   type        = number
 }
 
+variable "availability_zones" {
+  description = "List of availability zones"
+  type        = list(string)
+}
+
 variable "public_subnet_cidrs" {
   description = "Public subnet cidr blocks"
   type        = list(string)
@@ -53,6 +58,10 @@ variable "subdomain" {
   type        = string
 }
 
+variable "zone_name" {
+  description = "Base domain name"
+  type        = string
+}
 # ALB and app variables
 
 variable "http_listener_port" {
@@ -116,5 +125,10 @@ variable "ttl" {
 
 variable "task_name" {
   description = "ECS task definition name"
+  type        = string
+}
+
+variable "container_name" {
+  description = "Name which you want to name your container"
   type        = string
 }

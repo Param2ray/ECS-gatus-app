@@ -6,7 +6,7 @@ module "vpc" {
   az_count             = var.az_count
   public_subnet_cidrs  = var.public_subnet_cidrs
   private_subnet_cidrs = var.private_subnet_cidrs
-
+  availability_zones   = var.availability_zones
 }
 
 module "acm" {
@@ -44,6 +44,7 @@ module "ecs" {
   source = "./modules/ecs"
 
   cluster_name          = var.cluster_name
+  container_name        = var.container_name
   ecs_launch_type       = var.ecs_launch_type
   desired_count         = var.desired_count
   container_port        = var.container_port
@@ -56,8 +57,9 @@ module "ecs" {
   iam_role_arn          = module.iam.task_execution_role_arn
   private_subnet_ids    = module.vpc.private_subnet_ids
   target_group_arn      = module.alb.target_group_arn
-  alb_security_group_id = module.alb.alb_security_group_id
+  alb_security_group_id = module.alb.alb_sg_id
   task_name             = var.task_name
+  depends_on            = [module.alb]
 }
 
 module "domain" {
@@ -66,5 +68,6 @@ module "domain" {
   alb_dns            = module.alb.alb_dns_name
   cloudflare_zone_id = var.cloudflare_zone_id
   subdomain          = var.subdomain
+  zone_name          = var.zone_name
 }
  
