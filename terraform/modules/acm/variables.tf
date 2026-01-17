@@ -19,3 +19,7 @@ variable "ttl" {
   default     = 300
 }
 
+variable "zone_name" {
+  description = "Base domain name (Cloudflare zone), e.g. paramjyot2ray.com"
+  type        = string
+}

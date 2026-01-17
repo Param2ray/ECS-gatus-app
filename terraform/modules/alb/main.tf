@@ -6,6 +6,18 @@ resource "aws_lb_target_group" "project_alb" {
   protocol    = "HTTP"
   vpc_id      = var.vpc_id
 
+  health_check {
+    enabled             = true
+    protocol            = "HTTP"
+    path                = "/health"
+    port                = "traffic-port"
+    matcher             = "200"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 5
+    unhealthy_threshold = 2
+  }
+
   tags = {
     Name = "project_alb_tg"
   }

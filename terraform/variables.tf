@@ -132,3 +132,13 @@ variable "container_name" {
   description = "Name which you want to name your container"
   type        = string
 }
+
+variable "task_family" {
+  description = "ECS task family name"
+  type        = string
+}
+
+variable "image_url" {
+  description = "Full ECR image URI including tag"
+  type        = string
+}

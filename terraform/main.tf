@@ -16,6 +16,7 @@ module "acm" {
   subdomain          = var.subdomain
   ttl                = var.ttl
   cloudflare_zone_id = var.cloudflare_zone_id
+  zone_name          = var.zone_name
 }
 
 module "alb" {
@@ -60,6 +61,8 @@ module "ecs" {
   alb_security_group_id = module.alb.alb_sg_id
   task_name             = var.task_name
   depends_on            = [module.alb]
+  execution_role_arn    = module.iam.task_execution_role_arn
+  task_family           = var.task_family
 }
 
 module "domain" {

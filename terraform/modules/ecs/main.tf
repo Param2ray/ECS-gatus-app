@@ -29,20 +29,22 @@ resource "aws_ecs_cluster" "ecs_cluster" {
 
 # Create an ECS task definition
 resource "aws_ecs_task_definition" "ecs_task" {
-    family                   = "project_task_definition"
-    network_mode             = "awsvpc"
-    requires_compatibilities = [var.ecs_launch_type]
-    cpu                      = var.cpu
-    memory                   = var.memory
+  family                   = var.task_family
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = var.cpu
+  memory                   = var.memory
+
+  execution_role_arn = var.execution_role_arn
     
     container_definitions = jsonencode([
         {
-        name      = var.task_name
+        name      = var.container_name
         image     = var.image_url
         portMappings = [
             {
-            containerPort = var.container_port
-            hostPort      = var.container_port
+            containerPort = 8080
+            hostPort      = 8080
             protocol      = "tcp"
             }
         ]
@@ -68,6 +70,7 @@ resource "aws_ecs_service" "ecs_service" {
     }
 
     load_balancer {
+        target_group_arn = var.target_group_arn
         container_name   = var.container_name
         container_port   = var.container_port
     }

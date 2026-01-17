@@ -14,20 +14,23 @@ resource "cloudflare_dns_record" "acm_cert_validation" {
       name    = dvo.resource_record_name
       content = dvo.resource_record_value
       type    = dvo.resource_record_type
+      proxied = false 
     }
   }
 
   zone_id = var.cloudflare_zone_id
-  name               = each.value.name
+  name = trimsuffix(replace(each.value.name, ".${var.zone_name}", ""), ".")
   type               = each.value.type
-  content            = each.value.content
+  content            = trimsuffix(each.value.content, ".")
   ttl                = var.ttl
   proxied            = false
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  certificate_arn         = aws_acm_certificate.cert.arn
-  validation_record_fqdns = [for record in cloudflare_dns_record.acm_cert_validation : record.hostname]
+  certificate_arn = aws_acm_certificate.cert.arn
 
+validation_record_fqdns = [
+  for dvo in aws_acm_certificate.cert.domain_validation_options :
+  trimsuffix(dvo.resource_record_name, ".")
+]
 }
-
