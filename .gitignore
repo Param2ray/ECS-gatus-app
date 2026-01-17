@@ -8,3 +8,4 @@ terraform/*.tfstate.*
 terraform.tfvars
 terraform.tfvars.json
 *.auto.tfvars
+.terraform.lock.hcl
