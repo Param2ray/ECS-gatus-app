@@ -62,7 +62,12 @@ module "ecs" {
   task_name             = var.task_name
   depends_on            = [module.alb]
   execution_role_arn    = module.iam.task_execution_role_arn
+  execution_role_name   = module.iam.task_execution_role_name
   task_family           = var.task_family
+}
+
+data "aws_ssm_parameter" "ecs_secrets" {
+  name = "ecs_secrets"
 }
 
 module "domain" {

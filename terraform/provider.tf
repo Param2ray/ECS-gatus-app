@@ -17,10 +17,11 @@ terraform {
 
   # S3 Backend Configuration
   backend "s3" {
-    bucket  = "ece-production-healthcheck-service"
-    key     = "terraform.tfstate"
-    region  = "ca-central-1"
-    encrypt = true
+    bucket         = "ece-production-healthcheck-service"
+    key            = "terraform.tfstate"
+    region         = "ca-central-1"
+    encrypt        = true
+    dynamodb_table = "terraform-state-lock"
   }
 }
 

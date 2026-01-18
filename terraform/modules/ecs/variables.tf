@@ -81,6 +81,7 @@ variable "task_name" {
 variable "container_name" {
   description = "Name which you want to name your container"
   type        = string
+  default     = "gatus "
 }
 
 variable "execution_role_arn" {
@@ -90,5 +91,10 @@ variable "execution_role_arn" {
 
 variable "task_family" {
   description = "ECS task family name"
+  type        = string
+}
+
+variable "execution_role_name" {
+  description = "Name of the ECS task execution role (used for IAM policy attachments)"
   type        = string
 }
