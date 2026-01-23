@@ -21,7 +21,7 @@ resource "aws_iam_policy" "ecs_read_ssm" {
     ]
   })
 }
-
+# 3) Attach the policy to the ECS task execution role
 resource "aws_iam_role_policy_attachment" "ecs_read_ssm_attach" {
   role       = var.execution_role_name
   policy_arn = aws_iam_policy.ecs_read_ssm.arn

@@ -23,3 +23,9 @@ variable "zone_name" {
   description = "Base domain name (Cloudflare zone), e.g. paramjyot2ray.com"
   type        = string
 }
+
+variable "manage_validation_records" {
+  description = "Whether Terraform should create DNS validation records in Cloudflare for ACM."
+  type        = bool
+  default     = false
+}

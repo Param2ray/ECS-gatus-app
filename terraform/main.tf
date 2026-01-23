@@ -17,7 +17,9 @@ module "acm" {
   ttl                = var.ttl
   cloudflare_zone_id = var.cloudflare_zone_id
   zone_name          = var.zone_name
+  manage_validation_records = var.manage_validation_records
 }
+
 
 module "alb" {
   source = "./modules/alb"

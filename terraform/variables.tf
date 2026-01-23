@@ -101,16 +101,6 @@ variable "desired_count" {
   default     = 2
 }
 
-variable "cpu" {
-  description = "CPU units for ECS task"
-  type        = number
-}
-
-variable "memory" {
-  description = "Memory for ECS task"
-  type        = number
-}
-
 variable "image_tag" {
   description = "ECR image tag"
   type        = string
@@ -123,14 +113,27 @@ variable "ttl" {
   default     = 300
 }
 
-variable "task_name" {
-  description = "ECS task definition name"
-  type        = string
+variable "manage_validation_records" {
+  description = "Whether Terraform should create Cloudflare DNS validation records for ACM."
+  type        = bool
+  default     = false
 }
 
 variable "container_name" {
-  description = "Name which you want to name your container"
+  description = "ECS container name"
   type        = string
+}
+
+variable "cpu" {
+  description = "CPU units for ECS task"
+  type        = number
+  default     = 256
+}
+
+variable "memory" {
+  description = "Memory in MB for ECS task"
+  type        = number
+  default     = 512
 }
 
 variable "task_family" {
@@ -138,7 +141,7 @@ variable "task_family" {
   type        = string
 }
 
-variable "image_url" {
-  description = "Full ECR image URI including tag"
+variable "task_name" {
+  description = "ECS task name"
   type        = string
 }
