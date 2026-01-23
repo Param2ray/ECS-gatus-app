@@ -1,10 +1,11 @@
+#local.terraform directories
+**/.terraform/*
+# .tfstate files
 venv/
 __pycache__/
 *.pyc
-.env
-terraform/.terraform/
-terraform/*.tfstate
-terraform/*.tfstate.*
-terraform.tfvars
-terraform.tfvars.json
-*.auto.tfvars
+**/*.tfstate
+**/*.tfstate.*
+**/*.lock.hcl
+**/*.tfvars
+**/*.env
