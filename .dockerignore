@@ -1,13 +1,7 @@
 .git
 .gitignore
 venv/
-__pycache__/
 *.pyc
 *.pyo
-terraform/
-*.tf
-*.tfstate
-*.tfstate.*
-.terraform/
 .env
 .DS_Store
