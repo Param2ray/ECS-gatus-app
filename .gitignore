@@ -9,3 +9,4 @@ __pycache__/
 **/*.lock.hcl
 **/*.tfvars
 **/*.env
+terraform/.terraform.lock.hcl
