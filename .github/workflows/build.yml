@@ -1,0 +1,28 @@
+name: Build and Push Docker Image to AWS ECR
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Docker/Dockerfile"
+  workflow_dispatch:
+
+permissions: #(required for OIDC)
+  id-token: write
+  contents: read
+
+jobs:
+  build:
+    name: Build and push to ECR
+    runs-on: ubuntu-latest
+
+    steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS credentials (OIDC)
+
+         
+        
+
+             
