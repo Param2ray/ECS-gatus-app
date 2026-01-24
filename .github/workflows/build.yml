@@ -58,9 +58,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push "${{ steps.build.outputs.image }}"
-
-            
-         uses: aquasecurity/trivy-action@v0.20.2
-        
-
-             
