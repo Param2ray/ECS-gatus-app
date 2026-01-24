@@ -7,7 +7,6 @@ on:
       - "Docker/**"
       - "app/**"
       - "requirements.txt"
-      - ".github/workflows/build.yml"
   workflow_dispatch:
 
 permissions:
