@@ -2,7 +2,7 @@
 
 FROM python:3.8-slim AS build
 
-WORKDIR /health
+WORKDIR /app
 
 COPY requirements.txt .
 
@@ -12,11 +12,11 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 FROM python:3.8-alpine
 
-WORKDIR /health
+WORKDIR /app
 
 COPY --from=build /install /usr/local
 
-COPY health.py .
+COPY app/ ./app/
 
 RUN adduser -D -h /home/myuser myuser
 
@@ -24,4 +24,4 @@ USER myuser
 
 EXPOSE 8080
 
-CMD ["python", "health.py"]
+CMD ["python", "app/health.py"]

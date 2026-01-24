@@ -1,27 +1,66 @@
-name: Build and Push Docker Image to AWS ECR
+name: Build, Scan, Push to ECR
 
 on:
   push:
     branches: [main]
     paths:
-      - "Docker/Dockerfile"
+      - "Docker/**"
+      - "app/**"
+      - "requirements.txt"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
 
-permissions: #(required for OIDC)
+permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: ca-central-1
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
-  build:
-    name: Build and push to ECR
+  build_scan_push:
     runs-on: ubuntu-latest
 
     steps:
-        - name: Checkout code
-          uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-        - name: Configure AWS credentials (OIDC)
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build Docker image
+        id: build
+        run: |
+          REGISTRY="${{ steps.login-ecr.outputs.registry }}"
+          REPO="${{ secrets.ECR_REPOSITORY }}"
+          TAG="${{ env.IMAGE_TAG }}"
+          IMAGE="${REGISTRY}/${REPO}:${TAG}"
+
+          docker build -t "$IMAGE" -f Docker/Dockerfile .
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+
+      - name: Trivy scan (fail on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@v0.20.0
+        with:
+          image-ref: ${{ steps.build.outputs.image }}
+          format: table
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: 1
+
+      - name: Push Docker image
+        run: |
+          docker push "${{ steps.build.outputs.image }}"
+
+            
          
         
 

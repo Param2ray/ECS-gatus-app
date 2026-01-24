@@ -12,11 +12,11 @@ module "vpc" {
 module "acm" {
   source = "./modules/acm"
 
-  domain_name        = var.domain_name
-  subdomain          = var.subdomain
-  ttl                = var.ttl
-  cloudflare_zone_id = var.cloudflare_zone_id
-  zone_name          = var.zone_name
+  domain_name               = var.domain_name
+  subdomain                 = var.subdomain
+  ttl                       = var.ttl
+  cloudflare_zone_id        = var.cloudflare_zone_id
+  zone_name                 = var.zone_name
   manage_validation_records = var.manage_validation_records
 }
 
