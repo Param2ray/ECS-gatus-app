@@ -24,4 +24,4 @@ USER myuser
 
 EXPOSE 8080
 
-CMD ["python", "app/health.py"]
+CMD ["python", "app/health.py"]# trigger pipeline
