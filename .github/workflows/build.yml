@@ -47,7 +47,7 @@ jobs:
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Trivy scan (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@v0.20.0
+        uses: aquasecurity/trivy-action@v0.20.2
         with:
           image-ref: ${{ steps.build.outputs.image }}
           format: table
@@ -60,7 +60,7 @@ jobs:
           docker push "${{ steps.build.outputs.image }}"
 
             
-         
+         uses: aquasecurity/trivy-action@v0.20.2
         
 
              
