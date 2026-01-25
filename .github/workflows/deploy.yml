@@ -5,6 +5,8 @@ on:
     branches: [ main ]
     paths:
       - "terraform/**"
+      - ".github/workflows/**"
+
   workflow_dispatch:
 
 permissions:
