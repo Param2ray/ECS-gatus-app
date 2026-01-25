@@ -47,7 +47,7 @@ jobs:
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
       - name: Trivy scan (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@v0.33.1
+        uses: aaquasecurity/trivy-action@b6643a2
         with:
           image-ref: ${{ steps.build.outputs.image }}
           format: table
