@@ -1,6 +1,6 @@
 # Stage 1: Build Stage
 
-FROM python:3.8-slim AS build
+FROM gcr.io/distroless/python3
 
 WORKDIR /app
 
