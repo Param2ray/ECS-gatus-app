@@ -2,7 +2,7 @@ name: Terraform Deploy
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
     paths:
       - "terraform/**"
       - ".github/workflows/**"
@@ -23,9 +23,32 @@ jobs:
     timeout-minutes: 30
 
     env:
+      # ---------- Cloudflare (secrets) ----------
       TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
       TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      # ---------- Terraform inputs (non-secrets) ----------
+      TF_VAR_name: ${{ vars.TF_NAME }}
+      TF_VAR_vpc_cidr: ${{ vars.TF_VPC_CIDR }}
+      TF_VAR_az_count: ${{ vars.TF_AZ_COUNT }}
+      TF_VAR_availability_zones: ${{ vars.TF_AVAILABILITY_ZONES }}
+      TF_VAR_public_subnet_cidrs: ${{ vars.TF_PUBLIC_SUBNET_CIDRS }}
+      TF_VAR_private_subnet_cidrs: ${{ vars.TF_PRIVATE_SUBNET_CIDRS }}
+
+      TF_VAR_domain_name: ${{ vars.TF_DOMAIN_NAME }}
+      TF_VAR_zone_name: ${{ vars.TF_ZONE_NAME }}
+      TF_VAR_subdomain: ${{ vars.TF_SUBDOMAIN }}
+
+      TF_VAR_cluster_name: ${{ vars.TF_CLUSTER_NAME }}
+      TF_VAR_container_name: ${{ vars.TF_CONTAINER_NAME }}
+      TF_VAR_task_family: ${{ vars.TF_TASK_FAMILY }}
+      TF_VAR_task_name: ${{ vars.TF_TASK_NAME }}
+      TF_VAR_cpu: ${{ vars.TF_CPU }}
+      TF_VAR_memory: ${{ vars.TF_MEMORY }}
+      TF_VAR_desired_count: ${{ vars.TF_DESIRED_COUNT }}
+      TF_VAR_image_tag: ${{ vars.TF_IMAGE_TAG }}
+      TF_VAR_manage_validation_records: ${{ vars.TF_MANAGE_VALIDATION_RECORDS }}
 
     steps:
       - name: Checkout code
@@ -40,7 +63,7 @@ jobs:
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
 
       - name: Setup Terraform
@@ -88,4 +111,5 @@ jobs:
           echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Website successfully running: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
 
