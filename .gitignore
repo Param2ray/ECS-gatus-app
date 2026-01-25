@@ -1,5 +1,7 @@
 #local.terraform directories
+
 **/.terraform/*
+
 # .tfstate files
 venv/
 __pycache__/
@@ -10,3 +12,6 @@ __pycache__/
 **/*.tfvars
 **/*.env
 terraform/.terraform.lock.hcl
+
+# Allow committing this one non-secret tfvars file for CI/CD
+!terraform/terraform.auto.tfvars
