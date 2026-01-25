@@ -83,9 +83,27 @@ jobs:
         working-directory: terraform
         run: terraform validate
 
-      - name: Terraform plan
+      # ✅ This step treats "changes found" (exit code 2) as SUCCESS
+      - name: Terraform plan (accept changes)
+        id: plan
         working-directory: terraform
-        run: terraform plan -input=false -lock-timeout=5m
+        shell: bash
+        run: |
+          set +e
+          terraform plan -input=false -lock-timeout=5m -detailed-exitcode
+          code=$?
+          if [ "$code" -eq 1 ]; then
+            echo "Terraform plan failed"
+            exit 1
+          fi
+
+          if [ "$code" -eq 2 ]; then
+            echo "Plan has changes (exit code 2) - continuing"
+          else
+            echo "Plan has no changes (exit code 0)"
+          fi
+
+          exit 0
 
       - name: Terraform apply
         working-directory: terraform
