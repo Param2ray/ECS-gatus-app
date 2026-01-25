@@ -83,27 +83,26 @@ jobs:
         working-directory: terraform
         run: terraform validate
 
-      # ✅ This step treats "changes found" (exit code 2) as SUCCESS
-      - name: Terraform plan (accept changes)
-        id: plan
+      # ✅ FIX: Terraform plan returns exit code 2 when it finds changes.
+      # GitHub Actions treats any non-zero as failure, so we handle it.
+      - name: Terraform plan (handle exit codes)
         working-directory: terraform
         shell: bash
         run: |
           set +e
           terraform plan -input=false -lock-timeout=5m -detailed-exitcode
           code=$?
+          set -e
+
+          # 0 = no changes
+          # 2 = changes present (NOT an error)
+          # 1 = actual error
           if [ "$code" -eq 1 ]; then
             echo "Terraform plan failed"
             exit 1
           fi
 
-          if [ "$code" -eq 2 ]; then
-            echo "Plan has changes (exit code 2) - continuing"
-          else
-            echo "Plan has no changes (exit code 0)"
-          fi
-
-          exit 0
+          echo "Terraform plan finished with exit code $code"
 
       - name: Terraform apply
         working-directory: terraform
