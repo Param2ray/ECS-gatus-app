@@ -29,7 +29,7 @@ variable "memory" {
 variable "container_port" {
   description = "Port on which the container listens"
   type        = number
-  }
+}
 
 variable "vpc_id" {
   description = "VPC ID where ECS will be deployed"
@@ -64,12 +64,12 @@ variable "target_group_arn" {
 variable "alb_security_group_id" {
   description = "Security group ID for the ALB"
   type        = string
-} 
+}
 
 variable "image_url" {
   type        = string
   description = "Name which you want to name your container"
-  
+
 }
 
 variable "task_name" {

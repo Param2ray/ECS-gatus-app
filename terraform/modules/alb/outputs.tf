@@ -20,6 +20,6 @@ output "https_listener_arn" {
 
 output "alb_sg_id" {
   description = "ALB Security Group ID"
-  value = aws_security_group.sg_alb.id
+  value       = aws_security_group.sg_alb.id
 }
 

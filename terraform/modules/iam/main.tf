@@ -1,6 +1,6 @@
 # Create an IAM role for ECS tasks to acces ECR image
 resource "aws_iam_role" "ecs_task_execution_role" {
-    name = "ecsTaskExecutionRole"
+  name = "ecsTaskExecutionRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -14,13 +14,13 @@ resource "aws_iam_role" "ecs_task_execution_role" {
       },
     ]
   })
-  }
+}
 
 # Attach the AmazonECSTaskExecutionRolePolicy managed policy to the role
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
-    role       = aws_iam_role.ecs_task_execution_role.name
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-  }
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
 
 resource "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"

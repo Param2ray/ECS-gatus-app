@@ -20,11 +20,11 @@ resource "cloudflare_dns_record" "acm_cert_validation" {
 
 
   zone_id = var.cloudflare_zone_id
-  name = trimsuffix(replace(each.value.name, ".${var.zone_name}", ""), ".")
-  type               = each.value.type
-  content            = trimsuffix(each.value.content, ".")
-  ttl                = var.ttl
-  proxied            = false
+  name    = trimsuffix(replace(each.value.name, ".${var.zone_name}", ""), ".")
+  type    = each.value.type
+  content = trimsuffix(each.value.content, ".")
+  ttl     = var.ttl
+  proxied = false
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {

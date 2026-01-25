@@ -10,37 +10,37 @@ resource "aws_vpc" "project_vpc" {
 
 # Create 2 public subnets and 2 private subnets
 resource "aws_subnet" "public_subnet_1" {
-  vpc_id     = aws_vpc.project_vpc.id
+  vpc_id            = aws_vpc.project_vpc.id
   availability_zone = var.availability_zones[0]
-  cidr_block = var.public_subnet_cidrs[0]  
-    tags ={
+  cidr_block        = var.public_subnet_cidrs[0]
+  tags = {
     Name = "public_subnet_1"
   }
 }
 
 resource "aws_subnet" "public_subnet_2" {
-  vpc_id     = aws_vpc.project_vpc.id
+  vpc_id            = aws_vpc.project_vpc.id
   availability_zone = var.availability_zones[1]
-  cidr_block = var.public_subnet_cidrs[1] 
-    tags = {
+  cidr_block        = var.public_subnet_cidrs[1]
+  tags = {
     Name = "public_subnet_2"
   }
 }
 
 resource "aws_subnet" "private_subnet_1" {
-  vpc_id     = aws_vpc.project_vpc.id
+  vpc_id            = aws_vpc.project_vpc.id
   availability_zone = var.availability_zones[0]
-  cidr_block = var.private_subnet_cidrs[0] 
-    tags ={
+  cidr_block        = var.private_subnet_cidrs[0]
+  tags = {
     Name = "private_subnet_1"
   }
 }
 
 resource "aws_subnet" "private_subnet_2" {
-  vpc_id     = aws_vpc.project_vpc.id
+  vpc_id            = aws_vpc.project_vpc.id
   availability_zone = var.availability_zones[1]
-  cidr_block = var.private_subnet_cidrs[1]  
-    tags = {
+  cidr_block        = var.private_subnet_cidrs[1]
+  tags = {
     Name = "private_subnet_2"
   }
 }
@@ -96,8 +96,8 @@ resource "aws_route_table" "private_rt" {
   route {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.nat_gw.id
-    } 
-    tags = {
+  }
+  tags = {
     Name = "private_rt"
   }
 }
