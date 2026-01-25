@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Run Checkov (IaC scan)
-        uses: bridgecrewio/checkov-action@vX
+        uses: bridgecrewio/checkov-action@master
         with:
           directory: terraform
           soft_fail: true
