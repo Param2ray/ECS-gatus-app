@@ -1,19 +1,20 @@
 variable "aws_region" {
-  description = "AWS region"
   type        = string
+  description = "AWS region"
 }
 
 variable "github_repo" {
-  description = "GitHub repository (owner/name)"
   type        = string
+  description = "OWNER/REPO, e.g. Param2ray/ecs-production-healthcheck-service"
 }
 
 variable "state_bucket" {
-  description = "S3 bucket name for Terraform state"
   type        = string
+  description = "S3 bucket name storing terraform state"
 }
 
 variable "lock_table_arn" {
-  description = "DynamoDB lock table ARN"
   type        = string
+  description = "ARN of DynamoDB table used for terraform state locking"
 }
+
