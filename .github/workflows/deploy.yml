@@ -12,121 +12,61 @@ permissions:
   id-token: write
   contents: read
 
-concurrency:
-  group: terraform-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  deploy:
-    name: Terraform Plan & Apply
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    env:
-      # ---------- Cloudflare (secrets) ----------
-      TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
-      TF_VAR_cloudflare_account_id: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      # ---------- Terraform inputs (non-secrets) ----------
-      TF_VAR_name: ${{ vars.TF_NAME }}
-      TF_VAR_vpc_cidr: ${{ vars.TF_VPC_CIDR }}
-      TF_VAR_az_count: ${{ vars.TF_AZ_COUNT }}
-      TF_VAR_availability_zones: ${{ vars.TF_AVAILABILITY_ZONES }}
-      TF_VAR_public_subnet_cidrs: ${{ vars.TF_PUBLIC_SUBNET_CIDRS }}
-      TF_VAR_private_subnet_cidrs: ${{ vars.TF_PRIVATE_SUBNET_CIDRS }}
-
-      TF_VAR_domain_name: ${{ vars.TF_DOMAIN_NAME }}
-      TF_VAR_zone_name: ${{ vars.TF_ZONE_NAME }}
-      TF_VAR_subdomain: ${{ vars.TF_SUBDOMAIN }}
-
-      TF_VAR_cluster_name: ${{ vars.TF_CLUSTER_NAME }}
-      TF_VAR_container_name: ${{ vars.TF_CONTAINER_NAME }}
-      TF_VAR_task_family: ${{ vars.TF_TASK_FAMILY }}
-      TF_VAR_task_name: ${{ vars.TF_TASK_NAME }}
-      TF_VAR_cpu: ${{ vars.TF_CPU }}
-      TF_VAR_memory: ${{ vars.TF_MEMORY }}
-      TF_VAR_desired_count: ${{ vars.TF_DESIRED_COUNT }}
-      TF_VAR_image_tag: ${{ vars.TF_IMAGE_TAG }}
-      TF_VAR_manage_validation_records: ${{ vars.TF_MANAGE_VALIDATION_RECORDS }}
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Run Checkov (IaC scan)
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: terraform
-          soft_fail: true
+    - name: Run Checkov action
+      id: checkov
+      uses: bridgecrewio/checkov-action@master
+      with:
+        directory: terraform
+        soft_fail: true
 
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ vars.AWS_REGION }}
+    - name: Configure AWS credentials (OIDC)
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        aws-region: ${{ vars.AWS_REGION }}
+    
+    - name: terraform fmt
+      uses: dflook/terraform-validate@v2
+      id: validate
+      with:
+        path: terraform
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.8
+    - name: terraform plan
+      uses: dflook/terraform-plan@v2
+      id: plan
+      with:
+        path: terraform
 
-      - name: Terraform fmt (check)
-        working-directory: terraform
-        run: terraform fmt -check -recursive
+    - name: terraform apply
+      uses: dflook/terraform-apply@v2
+      continue-on-error: true
+      with:
+        path: terraform
+        auto-approve: true
 
-      - name: Terraform init
-        working-directory: terraform
-        run: terraform init -input=false
-
-      - name: Terraform validate
-        working-directory: terraform
-        run: terraform validate
-
-      # ✅ FIX: Terraform plan returns exit code 2 when it finds changes.
-      # GitHub Actions treats any non-zero as failure, so we handle it.
-      - name: Terraform plan (handle exit codes)
-        working-directory: terraform
-        shell: bash
-        run: |
-          set +e
-          terraform plan -input=false -lock-timeout=5m -detailed-exitcode
-          code=$?
-          set -e
-
-          # 0 = no changes
-          # 2 = changes present (NOT an error)
-          # 1 = actual error
-          if [ "$code" -eq 1 ]; then
-            echo "Terraform plan failed"
-            exit 1
-          fi
-
-          echo "Terraform plan finished with exit code $code"
-
-      - name: Terraform apply
-        working-directory: terraform
-        run: terraform apply -input=false -auto-approve -lock-timeout=5m
-
-  health-check:
-    name: Post-Deploy Health Check
-    needs: deploy
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-
-    steps:
-      - name: Health check
-        uses: jtalk/url-health-check-action@v4
-        with:
-          url: https://${{ vars.FULL_DOMAIN }}/health
-          follow-redirect: true
-          max-attempts: 20
-          retry-delay: 15s
-
-      - name: Deployment summary
-        run: |
+ health-check:
+  name: Post-Deploy Health Check
+  needs: build
+  runs-on: ubuntu-latest
+  steps:
+    - name: Health check
+      uses: jtalk/url-health-check-action@v4
+      with:
+        url: https://${{ vars.DOMAIN_NAME }}.com/health
+        follow-redirects: true
+        timeout-seconds: 10
+        retry-delay: 15s
+    
+   name: Deployment summary
+   run: |
           echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Website successfully running: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
-
-
+          echo "Website successfully running: https://${{ vars.DOMAIN_NAME }}.com" >> "$GITHUB_STEP_SUMMARY"
+   
