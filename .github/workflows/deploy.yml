@@ -2,7 +2,7 @@ name: Terraform Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
     paths:
       - "terraform/**"
       - ".github/workflows/**"
@@ -16,57 +16,56 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Run Checkov action
-      id: checkov
-      uses: bridgecrewio/checkov-action@master
-      with:
-        directory: terraform
-        soft_fail: true
+      - name: Run Checkov action
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          soft_fail: true
 
-    - name: Configure AWS credentials (OIDC)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: ${{ vars.AWS_REGION }}
-    
-    - name: terraform fmt
-      uses: dflook/terraform-validate@v2
-      id: validate
-      with:
-        path: terraform
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
 
-    - name: terraform plan
-      uses: dflook/terraform-plan@v2
-      id: plan
-      with:
-        path: terraform
+      - name: Terraform validate
+        uses: dflook/terraform-validate@v2
+        with:
+          path: terraform
 
-    - name: terraform apply
-      uses: dflook/terraform-apply@v2
-      continue-on-error: true
-      with:
-        path: terraform
-        auto-approve: true
+      - name: Terraform plan
+        uses: dflook/terraform-plan@v2
+        with:
+          path: terraform
 
- health-check:
-  name: Post-Deploy Health Check
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
-    - name: Health check
-      uses: jtalk/url-health-check-action@v4
-      with:
-        url: https://${{ vars.DOMAIN_NAME }}.com/health
-        follow-redirects: true
-        timeout-seconds: 10
-        retry-delay: 15s
-    
-   name: Deployment summary
-   run: |
+      - name: Terraform apply
+        uses: dflook/terraform-apply@v2
+        continue-on-error: true
+        with:
+          path: terraform
+          auto_approve: true
+
+  health-check:
+    name: Post-Deploy Health Check
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Health check
+        uses: jtalk/url-health-check-action@v4
+        with:
+          url: https://${{ vars.DOMAIN_NAME }}.com/health
+          follow-redirect: true
+          max-attempts: 20
+          retry-delay: 15s
+
+      - name: Deployment summary
+        run: |
           echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Website successfully running: https://${{ vars.DOMAIN_NAME }}.com" >> "$GITHUB_STEP_SUMMARY"
+
+
    
