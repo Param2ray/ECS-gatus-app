@@ -97,9 +97,9 @@ resource "aws_iam_policy" "github_actions_extra" {
         Resource = "arn:aws:ssm:${var.aws_region}:512378127667:parameter/ecs_secrets"
       },
       {
-        Sid    = "ReadEcsExecutionRole"
-        Effect = "Allow"
-        Action = ["iam:GetRole"]
+        Sid      = "ReadEcsExecutionRole"
+        Effect   = "Allow"
+        Action   = ["iam:GetRole"]
         Resource = "arn:aws:iam::512378127667:role/ecsTaskExecutionRole"
       }
     ]
