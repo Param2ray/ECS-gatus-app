@@ -1,11 +1,7 @@
 #local.terraform directories
-
 **/.terraform/*
 
 # .tfstate files
-venv/
-__pycache__/
-*.pyc
 **/*.tfstate
 **/*.tfstate.*
 **/*.lock.hcl
