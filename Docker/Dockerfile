@@ -1,27 +1,26 @@
-# Stage 1: Build Stage
-FROM python:3.12-alpine AS builder
-
+# Stage 1: Lightweight Build Stage
+FROM golang:1.24-alpine AS builder
+# Set desitination for COPY instructions
 WORKDIR /app
-
-RUN apk add --no-cache gcc musl-dev libffi-dev
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir --prefix=/install -r requirements.txt
-
-COPY app/ app/
-
-# Stage 2: Runtime Stage
-FROM python:3.12-alpine
-
+# Copy go.mod and go.sum files
+COPY app/go.mod app/go.sum ./
+# Download Go module dependencies
+RUN go mod download
+# Copy the source code
+COPY app/ ./
+# Build slimmed down and defined
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/gatus-build
+# Clean up unnecessary files
+RUN go mod tidy
+# Stage 2: Build the application
+FROM gcr.io/distroless/static-debian12:nonroot AS release
+#  Set environment variable for config path
+ENV GATUS_CONFIG_PATH=/config/config.yaml
+# Set working directory
 WORKDIR /app
-
-COPY --from=builder /install /usr/local
-COPY --from=builder /app /app
-
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
-
+#Copy into distroless image
+COPY --from=builder /app/gatus-build /app/gatus-build
+# Expose application port
 EXPOSE 8080
-
-CMD ["python", "app/health.py"]
+# Command to run the application
+CMD ["/app/gatus-build"]
