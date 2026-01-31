@@ -27,5 +27,5 @@ variable "zone_name" {
 variable "manage_validation_records" {
   description = "Whether Terraform should create DNS validation records in Cloudflare for ACM."
   type        = bool
-  default     = false
+  default     = true
 }

@@ -12,6 +12,8 @@ COPY app/ ./
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/gatus-build
 # Clean up unnecessary files
 RUN go mod tidy
+
+
 # Stage 2: Build the application
 FROM gcr.io/distroless/static-debian12:nonroot AS release
 #  Set environment variable for config path
@@ -20,6 +22,8 @@ ENV GATUS_CONFIG_PATH=/config/config.yaml
 WORKDIR /app
 #Copy into distroless image
 COPY --from=builder /app/gatus-build /app/gatus-build
+
+COPY config/config.yaml /config/config.yaml
 # Expose application port
 EXPOSE 8080
 # Command to run the application
