@@ -36,33 +36,30 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker image (SHA + latest)
+      - name: Build Docker image
         id: build
         run: |
           REGISTRY="${{ steps.login-ecr.outputs.registry }}"
           REPO="${{ secrets.ECR_REPOSITORY }}"
-          SHA_TAG="${{ env.IMAGE_TAG }}"
+          TAG="${{ env.IMAGE_TAG }}"
+          IMAGE="${REGISTRY}/${REPO}:${TAG}"
 
-          IMAGE_SHA="${REGISTRY}/${REPO}:${SHA_TAG}"
-          IMAGE_LATEST="${REGISTRY}/${REPO}:latest"
+          docker build -t "$IMAGE" -f Docker/Dockerfile .
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
 
-          docker build -f Docker/Dockerfile -t "$IMAGE_SHA" -t "$IMAGE_LATEST" .
-          echo "image_sha=$IMAGE_SHA" >> $GITHUB_OUTPUT
-          echo "image_latest=$IMAGE_LATEST" >> $GITHUB_OUTPUT
-
-      - name: Trivy scan (fail on HIGH/CRITICAL)
-        uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
-        with:
-          image-ref: ${{ steps.build.outputs.image_sha }}
-          format: table
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-          exit-code: 1
+      -   name: Trivy scan (fail on HIGH/CRITICAL)
+          uses: aquasecurity/trivy-action@b6643a29fecd7f34b3597bc6acb0a98b03d33ff8
+          with:
+            image-ref: ${{ steps.build.outputs.image }}
+            format: table
+            severity: HIGH,CRITICAL
+            ignore-unfixed: true
+            exit-code: 1
 
       - name: Push Docker image to ECR
         run: |
-          docker push "${{ steps.build.outputs.image_sha }}"
-          docker push "${{ steps.build.outputs.image_latest }}"
+          docker push "${{ steps.build.outputs.image }}"
+
 
 
 
