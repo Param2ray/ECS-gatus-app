@@ -26,5 +26,5 @@ variable "private_subnet_cidrs" {
 variable "availability_zones" {
   description = "List of availability zones to use"
   type        = list(string)
-  default     = ["canada-central-1a", "canada-central-1b"]
+  default     = ["ca-central-1a", "ca-central-1b"]
 }

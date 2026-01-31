@@ -81,7 +81,7 @@ variable "task_name" {
 variable "container_name" {
   description = "Name which you want to name your container"
   type        = string
-  default     = "gatus "
+  default     = "gatus"
 }
 
 variable "execution_role_arn" {
