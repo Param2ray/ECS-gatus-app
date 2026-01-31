@@ -4,10 +4,9 @@ on:
   push:
     branches: [main]
     paths:
+      - ".github/workflows/build.yml"
       - "Docker/**"
-      - "app/**"
-      - "config/**"
-      - ".github/workflows/**"
+      - "Dockerfile"
   workflow_dispatch:
 
 permissions:
