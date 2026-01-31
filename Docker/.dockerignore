@@ -1,7 +1,8 @@
 .git
 .gitignore
-venv/
-*.pyc
-*.pyo
-.env
+*
+!Docker/**
+!app/**
+!config/**
+!.github/**
 .DS_Store
