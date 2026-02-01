@@ -98,4 +98,56 @@ resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach
   policy_arn = aws_iam_policy.terraform_state_access.arn
 }
 
+resource "aws_iam_role_policy" "github_actions_terraform_read" {
+  name = "terraform-read-refresh"
+  role = aws_iam_role.github_actions_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      {
+        Sid    = "ACMRead"
+        Effect = "Allow"
+        Action = [
+          "acm:DescribeCertificate",
+          "acm:ListCertificates",
+          "acm:ListTagsForCertificate"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "ELBv2Read"
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeLoadBalancerAttributes",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetGroupAttributes",
+          "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeRules",
+          "elasticloadbalancing:DescribeTags"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "IAMRead"
+        Effect = "Allow"
+        Action = [
+          "iam:GetRole",
+          "iam:ListRolePolicies",
+          "iam:GetRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
 
