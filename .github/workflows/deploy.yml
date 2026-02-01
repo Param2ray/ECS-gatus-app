@@ -5,15 +5,20 @@ on:
     branches: ["main"]
     paths:
       - "terraform/**"
-      - ".github/workflows/**"
+      - "terraform-bootstrap/**"
+      - ".github/workflows/terraform-deploy.yml"
   workflow_dispatch:
+
+concurrency:
+  group: terraform-deploy
+  cancel-in-progress: true
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  build:
+  terraform:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -31,6 +36,14 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
 
+      # ✅ Guard rail: fail fast if the image tag doesn't exist in ECR
+      - name: Verify image exists in ECR
+        run: |
+          aws ecr describe-images \
+            --repository-name "${{ vars.ECR_REPOSITORY }}" \
+            --region "${{ vars.AWS_REGION }}" \
+            --image-ids imageTag="${{ github.sha }}" > /dev/null
+
       - name: Terraform validate
         uses: dflook/terraform-validate@v2
         with:
@@ -43,20 +56,21 @@ jobs:
 
       - name: Terraform apply
         uses: dflook/terraform-apply@v2
-        continue-on-error: true
         with:
           path: terraform
           auto_approve: true
+          variables: |
+            image_tag=${{ github.sha }}
 
   health-check:
     name: Post-Deploy Health Check
-    needs: build
+    needs: terraform
     runs-on: ubuntu-latest
     steps:
       - name: Health check
         uses: jtalk/url-health-check-action@v4
         with:
-          url: https://${{ vars.DOMAIN_NAME }}.com/health
+          url: https://${{ vars.DOMAIN_NAME }}/health
           follow-redirect: true
           max-attempts: 20
           retry-delay: 15s
@@ -65,7 +79,12 @@ jobs:
         run: |
           echo "## Deployment Status" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "Website successfully running: https://${{ vars.DOMAIN_NAME }}.com" >> "$GITHUB_STEP_SUMMARY"
+          echo "Terraform apply succeeded" >> "$GITHUB_STEP_SUMMARY"
+          echo "Health check passed: https://${{ vars.DOMAIN_NAME }}/health" >> "$GITHUB_STEP_SUMMARY"
+          echo "App URL: https://${{ vars.DOMAIN_NAME }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
+
+
 
 
    
