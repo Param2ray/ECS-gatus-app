@@ -1,0 +1,54 @@
+name: Terraform Destroy
+
+on:
+  workflow_dispatch:
+    inputs:
+      terraform_destroy:
+        description: 'Type "DESTROY" to confirm. This will delete infrastructure and cannot be undone.'
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  destroy:
+    name: Terraform Destroy
+    runs-on: ubuntu-latest
+
+    if: ${{ inputs.terraform_destroy == 'DESTROY' }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Show destroy context
+        run: |
+          echo "INFRA_PATH = ${{ vars.INFRA_PATH }}"
+          echo "AWS_REGION = ${{ vars.AWS_REGION }}"
+
+      - name: Run Checkov (IaC scan)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: ${{ vars.INFRA_PATH }}
+          soft_fail: true
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Terraform destroy plan
+        id: plan
+        uses: dflook/terraform-plan@v2
+        with:
+          path: ${{ vars.INFRA_PATH }}
+          destroy: true
+
+      - name: Terraform apply (destroy)
+        uses: dflook/terraform-apply@v2
+        with:
+          path: ${{ vars.INFRA_PATH }}
+          plan_path: ${{ steps.plan.outputs.plan_path }}
+          auto_approve: true
