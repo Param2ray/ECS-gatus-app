@@ -36,7 +36,6 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      # ✅ Guard rail: fail fast if the image tag doesn't exist in ECR
       - name: Verify image exists in ECR
         run: |
           aws ecr describe-images \
