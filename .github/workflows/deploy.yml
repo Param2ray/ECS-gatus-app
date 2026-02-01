@@ -40,7 +40,7 @@ jobs:
       - name: Verify image exists in ECR
         run: |
           aws ecr describe-images \
-            --repository-name "${{ vars.ECR_REPOSITORY }}" \
+            --repository-name "vpc-gatus" \
             --region "${{ vars.AWS_REGION }}" \
             --image-ids imageTag="${{ github.sha }}" > /dev/null
 
