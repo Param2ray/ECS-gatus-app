@@ -155,32 +155,41 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
 
 resource "aws_iam_policy" "github_actions_destroy_permissions" {
   name        = "github-actions-destroy-permissions"
-  description = "Permissions required for Terraform destroy from GitHub Actions (EC2/IAM cleanup + ECR image cleanup)"
+  description = "Permissions required for Terraform destroy from GitHub Actions (runtime cleanup)"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-     
+
       {
         Sid    = "EC2Cleanup"
         Effect = "Allow"
         Action = [
           "ec2:DeleteSecurityGroup",
-          "ec2:DeleteRouteTable",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+
           "ec2:DisassociateRouteTable",
+          "ec2:DeleteRoute",
+          "ec2:DeleteRouteTable",
+          "ec2:ReplaceRoute",
+          "ec2:ReplaceRouteTableAssociation",
+
           "ec2:DeleteSubnet",
           "ec2:DeleteInternetGateway",
           "ec2:DetachInternetGateway",
           "ec2:DeleteNatGateway",
           "ec2:ReleaseAddress",
           "ec2:DeleteVpc",
-          "ec2:DeleteNetworkInterface"
+
+          "ec2:DeleteNetworkInterface",
+          "ec2:DescribeNetworkInterfaces"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "IAMCleanup"
+        Sid    = "IAMDetachCleanup"
         Effect = "Allow"
         Action = [
           "iam:DetachRolePolicy",
@@ -209,6 +218,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_destroy_permissions_at
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_destroy_permissions.arn
 }
+
 
 
 
