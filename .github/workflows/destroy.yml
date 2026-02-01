@@ -26,7 +26,7 @@ jobs:
         run: |
           echo "INFRA_PATH = ${{ vars.INFRA_PATH }}"
           echo "AWS_REGION = ${{ vars.AWS_REGION }}"
-          echo "Running full terraform destroy for tracked resources"
+          echo "Destroying runtime modules only (keeping IAM + ECR)"
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -34,12 +34,18 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform destroy plan
+      - name: Terraform destroy plan (runtime only)
         id: plan
         uses: dflook/terraform-plan@v2
         with:
           path: ${{ vars.INFRA_PATH }}
           destroy: true
+          target: |
+            module.vpc
+            module.alb
+            module.ecs
+            module.acm
+            module.domain
           variables: |
             cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
             cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
@@ -52,6 +58,7 @@ jobs:
           path: ${{ vars.INFRA_PATH }}
           plan_path: ${{ steps.plan.outputs.plan_path }}
           auto_approve: true
+
 
 
 
