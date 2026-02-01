@@ -53,15 +53,15 @@ resource "aws_iam_policy" "terraform_state_access" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "TerraformStateS3ListBucket"
-        Effect = "Allow"
-        Action = ["s3:ListBucket"]
+        Sid      = "TerraformStateS3ListBucket"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
         Resource = ["arn:aws:s3:::ece-production-healthcheck-service"]
       },
       {
-        Sid    = "TerraformStateS3Objects"
-        Effect = "Allow"
-        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Sid      = "TerraformStateS3Objects"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
         Resource = ["arn:aws:s3:::ece-production-healthcheck-service/*"]
       },
       {
@@ -87,25 +87,26 @@ resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach
 
 resource "aws_iam_policy" "github_actions_runtime_destroy" {
   name        = "github-actions-runtime-destroy"
-  description = "Allow GitHub Actions to destroy runtime infrastructure (VPC/ALB/ECS/ACM/Route53) but keep IAM/ECR"
+  description = "Allow GitHub Actions to destroy runtime infra (VPC/ALB/ECS/ACM/Logs). Keeps IAM/ECR by not targeting them."
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      
       {
-        Sid    = "EC2Destroy"
+        Sid    = "EC2RuntimeDestroy"
         Effect = "Allow"
         Action = [
+          "ec2:Describe*",
+
           "ec2:DeleteSecurityGroup",
           "ec2:RevokeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupEgress",
 
           "ec2:DisassociateRouteTable",
-          "ec2:DeleteRoute",
-          "ec2:DeleteRouteTable",
-          "ec2:ReplaceRoute",
           "ec2:ReplaceRouteTableAssociation",
+          "ec2:DeleteRoute",
+          "ec2:ReplaceRoute",
+          "ec2:DeleteRouteTable",
 
           "ec2:DeleteSubnet",
           "ec2:DeleteInternetGateway",
@@ -115,17 +116,16 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
           "ec2:DeleteVpc",
 
           "ec2:DeleteNetworkInterface",
-          "ec2:DescribeNetworkInterfaces",
-
-          "ec2:Describe*"
+          "ec2:DescribeNetworkInterfaces"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "ELBv2Destroy"
+        Sid    = "ELBv2RuntimeDestroy"
         Effect = "Allow"
         Action = [
+          "elasticloadbalancing:Describe*",
           "elasticloadbalancing:DeleteListener",
           "elasticloadbalancing:DeleteLoadBalancer",
           "elasticloadbalancing:DeleteRule",
@@ -133,45 +133,44 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
           "elasticloadbalancing:ModifyListener",
           "elasticloadbalancing:ModifyLoadBalancerAttributes",
           "elasticloadbalancing:ModifyTargetGroup",
-          "elasticloadbalancing:ModifyTargetGroupAttributes",
-          "elasticloadbalancing:Describe*"
+          "elasticloadbalancing:ModifyTargetGroupAttributes"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "ECSDestroy"
+        Sid    = "ECSRuntimeDestroy"
         Effect = "Allow"
         Action = [
-          "ecs:DeleteCluster",
-          "ecs:DeleteService",
-          "ecs:DeregisterTaskDefinition",
           "ecs:Describe*",
           "ecs:List*",
-          "ecs:UpdateService"
+          "ecs:UpdateService",
+          "ecs:DeleteService",
+          "ecs:DeleteCluster",
+          "ecs:DeregisterTaskDefinition"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "ACMDestroy"
+        Sid    = "ACMRuntimeDestroy"
         Effect = "Allow"
         Action = [
-          "acm:DeleteCertificate",
           "acm:DescribeCertificate",
           "acm:ListCertificates",
-          "acm:ListTagsForCertificate"
+          "acm:ListTagsForCertificate",
+          "acm:DeleteCertificate"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "LogsDestroy"
+        Sid    = "CloudWatchLogsRuntimeDestroy"
         Effect = "Allow"
         Action = [
-          "logs:DeleteLogGroup",
           "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
+          "logs:DescribeLogStreams",
+          "logs:DeleteLogGroup"
         ]
         Resource = "*"
       }
@@ -183,6 +182,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_runtime_destroy.arn
 }
+
 
 
 
