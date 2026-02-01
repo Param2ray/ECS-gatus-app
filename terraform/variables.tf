@@ -159,3 +159,8 @@ variable "aws_region" {
   description = "AWS region to deploy resources"
   default     = "ca-central-1"
 }
+
+variable "github_actions_role_name" {
+  description = "Existing GitHub Actions IAM role name (created outside Terraform)"
+  type        = string
+}

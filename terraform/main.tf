@@ -35,6 +35,8 @@ module "alb" {
 
 module "iam" {
   source = "./modules/iam"
+
+  github_actions_role_name = var.github_actions_role_name
 }
 
 module "ecr" {

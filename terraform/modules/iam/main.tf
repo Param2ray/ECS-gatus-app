@@ -1,3 +1,26 @@
+data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+
+    actions = ["sts:AssumeRole"]
+  }
+}
+
+resource "aws_iam_role" "ecs_task_execution_role" {
+  name               = "ecs-task-execution-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_assume_role.json
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
+  role       = aws_iam_role.ecs_task_execution_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
 resource "aws_iam_policy" "github_actions_runtime_destroy" {
   name        = "github-actions-runtime-destroy"
   description = "Allow GitHub Actions to destroy runtime infra (VPC/ALB/ECS/ACM/Logs). Keeps IAM/ECR by not targeting them."
@@ -11,24 +34,20 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         Effect = "Allow"
         Action = [
           "ec2:Describe*",
-
           "ec2:DeleteSecurityGroup",
           "ec2:RevokeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupEgress",
-
           "ec2:DisassociateRouteTable",
           "ec2:ReplaceRouteTableAssociation",
           "ec2:DeleteRoute",
           "ec2:ReplaceRoute",
           "ec2:DeleteRouteTable",
-
           "ec2:DeleteSubnet",
           "ec2:DeleteInternetGateway",
           "ec2:DetachInternetGateway",
           "ec2:DeleteNatGateway",
           "ec2:ReleaseAddress",
           "ec2:DeleteVpc",
-
           "ec2:DeleteNetworkInterface",
           "ec2:DescribeNetworkInterfaces"
         ]
@@ -106,9 +125,11 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach" {
-  role       = aws_iam_role.github_actions_role.name
+  role       = var.github_actions_role_name
   policy_arn = aws_iam_policy.github_actions_runtime_destroy.arn
 }
+
+
 
 
 
