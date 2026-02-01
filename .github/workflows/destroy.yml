@@ -42,7 +42,7 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform destroy plan
+      - name: Terraform destroy plan (runtime modules only)
         id: plan
         uses: dflook/terraform-plan@v2
         with:
@@ -53,8 +53,14 @@ jobs:
             cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
             cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
             image_tag="${{ github.sha }}"
+          target: |
+            module.vpc
+            module.alb
+            module.ecs
+            module.acm
+            module.domain
 
-      - name: Terraform apply (destroy)
+      - name: Terraform apply (destroy) (runtime modules only)
         uses: dflook/terraform-apply@v2
         with:
           path: ${{ vars.INFRA_PATH }}
@@ -65,4 +71,11 @@ jobs:
             cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
             cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
             image_tag="${{ github.sha }}"
+          target: |
+            module.vpc
+            module.alb
+            module.ecs
+            module.acm
+            module.domain
+
 
