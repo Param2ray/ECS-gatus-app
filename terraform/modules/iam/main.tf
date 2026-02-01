@@ -43,6 +43,10 @@ resource "aws_iam_role" "github_actions_role" {
       }
     ]
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_iam_policy" "terraform_state_access" {
@@ -52,7 +56,6 @@ resource "aws_iam_policy" "terraform_state_access" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-
       {
         Sid    = "TerraformStateS3ListBucket"
         Effect = "Allow"
@@ -63,7 +66,6 @@ resource "aws_iam_policy" "terraform_state_access" {
           "arn:aws:s3:::ece-production-healthcheck-service"
         ]
       },
-
       {
         Sid    = "TerraformStateS3Objects"
         Effect = "Allow"
@@ -76,7 +78,6 @@ resource "aws_iam_policy" "terraform_state_access" {
           "arn:aws:s3:::ece-production-healthcheck-service/*"
         ]
       },
-
       {
         Sid    = "TerraformStateDynamoLock"
         Effect = "Allow"
@@ -91,6 +92,10 @@ resource "aws_iam_policy" "terraform_state_access" {
       }
     ]
   })
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach" {
@@ -105,7 +110,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-
       {
         Sid    = "ACMRead"
         Effect = "Allow"
@@ -116,7 +120,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "ELBv2Read"
         Effect = "Allow"
@@ -132,7 +135,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "IAMRead"
         Effect = "Allow"
@@ -150,6 +152,64 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
     ]
   })
 }
+
+resource "aws_iam_policy" "github_actions_destroy_permissions" {
+  name        = "github-actions-destroy-permissions"
+  description = "Permissions required for Terraform destroy from GitHub Actions (EC2/IAM cleanup + ECR image cleanup)"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+     
+      {
+        Sid    = "EC2Cleanup"
+        Effect = "Allow"
+        Action = [
+          "ec2:DeleteSecurityGroup",
+          "ec2:DeleteRouteTable",
+          "ec2:DisassociateRouteTable",
+          "ec2:DeleteSubnet",
+          "ec2:DeleteInternetGateway",
+          "ec2:DetachInternetGateway",
+          "ec2:DeleteNatGateway",
+          "ec2:ReleaseAddress",
+          "ec2:DeleteVpc",
+          "ec2:DeleteNetworkInterface"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "IAMCleanup"
+        Effect = "Allow"
+        Action = [
+          "iam:DetachRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:DeletePolicy",
+          "iam:DeletePolicyVersion"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "ECRImageCleanup"
+        Effect = "Allow"
+        Action = [
+          "ecr:BatchDeleteImage",
+          "ecr:ListImages",
+          "ecr:DescribeImages"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_destroy_permissions_attach" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.github_actions_destroy_permissions.arn
+}
+
 
 
 
