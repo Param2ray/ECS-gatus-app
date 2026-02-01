@@ -55,24 +55,14 @@ resource "aws_iam_policy" "terraform_state_access" {
       {
         Sid    = "TerraformStateS3ListBucket"
         Effect = "Allow"
-        Action = [
-          "s3:ListBucket"
-        ]
-        Resource = [
-          "arn:aws:s3:::ece-production-healthcheck-service"
-        ]
+        Action = ["s3:ListBucket"]
+        Resource = ["arn:aws:s3:::ece-production-healthcheck-service"]
       },
       {
         Sid    = "TerraformStateS3Objects"
         Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = [
-          "arn:aws:s3:::ece-production-healthcheck-service/*"
-        ]
+        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
+        Resource = ["arn:aws:s3:::ece-production-healthcheck-service/*"]
       },
       {
         Sid    = "TerraformStateDynamoLock"
@@ -95,66 +85,16 @@ resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach
   policy_arn = aws_iam_policy.terraform_state_access.arn
 }
 
-resource "aws_iam_role_policy" "github_actions_terraform_read" {
-  name = "terraform-read-refresh"
-  role = aws_iam_role.github_actions_role.name
+resource "aws_iam_policy" "github_actions_runtime_destroy" {
+  name        = "github-actions-runtime-destroy"
+  description = "Allow GitHub Actions to destroy runtime infrastructure (VPC/ALB/ECS/ACM/Route53) but keep IAM/ECR"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
+      
       {
-        Sid    = "ACMRead"
-        Effect = "Allow"
-        Action = [
-          "acm:DescribeCertificate",
-          "acm:ListCertificates",
-          "acm:ListTagsForCertificate"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "ELBv2Read"
-        Effect = "Allow"
-        Action = [
-          "elasticloadbalancing:DescribeLoadBalancers",
-          "elasticloadbalancing:DescribeLoadBalancerAttributes",
-          "elasticloadbalancing:DescribeTargetGroups",
-          "elasticloadbalancing:DescribeTargetGroupAttributes",
-          "elasticloadbalancing:DescribeListeners",
-          "elasticloadbalancing:DescribeListenerAttributes",
-          "elasticloadbalancing:DescribeRules",
-          "elasticloadbalancing:DescribeTags"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "IAMRead"
-        Effect = "Allow"
-        Action = [
-          "iam:GetRole",
-          "iam:ListRolePolicies",
-          "iam:GetRolePolicy",
-          "iam:ListAttachedRolePolicies",
-          "iam:GetPolicy",
-          "iam:GetPolicyVersion",
-          "iam:ListPolicyVersions"
-        ]
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "github_actions_destroy_permissions" {
-  name        = "github-actions-destroy-permissions"
-  description = "Permissions required for Terraform destroy from GitHub Actions (runtime cleanup)"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-
-      {
-        Sid    = "EC2Cleanup"
+        Sid    = "EC2Destroy"
         Effect = "Allow"
         Action = [
           "ec2:DeleteSecurityGroup",
@@ -175,30 +115,63 @@ resource "aws_iam_policy" "github_actions_destroy_permissions" {
           "ec2:DeleteVpc",
 
           "ec2:DeleteNetworkInterface",
-          "ec2:DescribeNetworkInterfaces"
+          "ec2:DescribeNetworkInterfaces",
+
+          "ec2:Describe*"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "IAMDetachCleanup"
+        Sid    = "ELBv2Destroy"
         Effect = "Allow"
         Action = [
-          "iam:DetachRolePolicy",
-          "iam:DeleteRolePolicy",
-          "iam:DeletePolicy",
-          "iam:DeletePolicyVersion"
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:Describe*"
         ]
         Resource = "*"
       },
 
       {
-        Sid    = "ECRImageCleanup"
+        Sid    = "ECSDestroy"
         Effect = "Allow"
         Action = [
-          "ecr:BatchDeleteImage",
-          "ecr:ListImages",
-          "ecr:DescribeImages"
+          "ecs:DeleteCluster",
+          "ecs:DeleteService",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:Describe*",
+          "ecs:List*",
+          "ecs:UpdateService"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "ACMDestroy"
+        Effect = "Allow"
+        Action = [
+          "acm:DeleteCertificate",
+          "acm:DescribeCertificate",
+          "acm:ListCertificates",
+          "acm:ListTagsForCertificate"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "LogsDestroy"
+        Effect = "Allow"
+        Action = [
+          "logs:DeleteLogGroup",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
         ]
         Resource = "*"
       }
@@ -206,10 +179,11 @@ resource "aws_iam_policy" "github_actions_destroy_permissions" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "github_actions_destroy_permissions_attach" {
+resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach" {
   role       = aws_iam_role.github_actions_role.name
-  policy_arn = aws_iam_policy.github_actions_destroy_permissions.arn
+  policy_arn = aws_iam_policy.github_actions_runtime_destroy.arn
 }
+
 
 
 
