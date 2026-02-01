@@ -126,6 +126,7 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
           "elasticloadbalancing:DescribeTargetGroups",
           "elasticloadbalancing:DescribeTargetGroupAttributes",
           "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeListenerAttributes",
           "elasticloadbalancing:DescribeRules",
           "elasticloadbalancing:DescribeTags"
         ]
@@ -149,5 +150,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
     ]
   })
 }
+
 
 
