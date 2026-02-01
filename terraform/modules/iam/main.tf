@@ -22,13 +22,14 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 }
 
 resource "aws_iam_policy" "github_actions_runtime_destroy" {
+  count = var.enable_destroy_policy ? 1 : 0
+
   name        = "github-actions-runtime-destroy"
-  description = "Allow GitHub Actions to destroy runtime infra (VPC/ALB/ECS/ACM/Logs). Keeps IAM/ECR by not targeting them."
+  description = "Allow GitHub Actions to destroy runtime infra (VPC/ALB/ECS/ACM/Logs)."
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-
       {
         Sid    = "EC2RuntimeDestroy"
         Effect = "Allow"
@@ -53,7 +54,6 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "ELBv2RuntimeDestroy"
         Effect = "Allow"
@@ -70,7 +70,6 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "ECSRuntimeDestroy"
         Effect = "Allow"
@@ -84,7 +83,6 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "ACMRuntimeDestroy"
         Effect = "Allow"
@@ -96,7 +94,6 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "CloudWatchLogsRuntimeDestroy"
         Effect = "Allow"
@@ -107,7 +104,6 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "IAMRuntimeDetachOnly"
         Effect = "Allow"
@@ -125,8 +121,10 @@ resource "aws_iam_policy" "github_actions_runtime_destroy" {
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach" {
+  count = var.enable_destroy_policy ? 1 : 0
+
   role       = var.github_actions_role_name
-  policy_arn = aws_iam_policy.github_actions_runtime_destroy.arn
+  policy_arn = aws_iam_policy.github_actions_runtime_destroy[0].arn
 }
 
 
