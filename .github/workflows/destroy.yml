@@ -48,8 +48,9 @@ jobs:
             module.domain
           variables: |
             cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            cloudflare_zone_id="${{ secrets.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+            github_actions_role_name="${{ secrets.OIDC_ROLE_NAME }}"
             image_tag="${{ github.sha }}"
 
       - name: Terraform apply (destroy)
@@ -60,9 +61,11 @@ jobs:
           auto_approve: true
           variables: |
             cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            cloudflare_zone_id="${{ secrets.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
+            github_actions_role_name="${{ secrets.OIDC_ROLE_NAME }}"
             image_tag="${{ github.sha }}"
+
 
 
 
