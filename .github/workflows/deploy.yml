@@ -67,7 +67,6 @@ jobs:
 
       - name: Terraform apply
         uses: dflook/terraform-apply@v2
-        continue-on-error: true
         with:
           path: terraform
           auto_approve: true
