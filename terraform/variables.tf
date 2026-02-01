@@ -147,15 +147,15 @@ variable "task_name" {
 
 variable "state_bucket_name" {
   description = "S3 bucket name for Terraform state"
-  default        = "ecs-production-healthcheck-service"
+  default     = "ecs-production-healthcheck-service"
 }
 
 variable "github_repo" {
   description = "GitHub repository for the application"
-  default        = "Param2ray/ecs-production-healthcheck-service"
+  default     = "Param2ray/ecs-production-healthcheck-service"
 }
 
 variable "aws_region" {
   description = "AWS region to deploy resources"
-  default        = "ca-central-1"
+  default     = "ca-central-1"
 }
