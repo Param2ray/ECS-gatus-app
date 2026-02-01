@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       terraform_destroy:
-        description: 'Type "DESTROY" to confirm. This will delete infrastructure and cannot be undone.'
+        description: 'Type "DESTROY" to confirm. This will delete runtime infrastructure.'
         required: true
 
 permissions:
@@ -26,15 +26,7 @@ jobs:
         run: |
           echo "INFRA_PATH = ${{ vars.INFRA_PATH }}"
           echo "AWS_REGION = ${{ vars.AWS_REGION }}"
-          echo "CLOUDFLARE_ZONE_ID is set? -> ${{ vars.CLOUDFLARE_ZONE_ID != '' }}"
-          echo "CLOUDFLARE_ACCOUNT_ID is set? -> ${{ vars.CLOUDFLARE_ACCOUNT_ID != '' }}"
-          echo "CLOUDFLARE_API_TOKEN is set? -> ${{ secrets.CLOUDFLARE_API_TOKEN != '' }}"
-
-      - name: Run Checkov (IaC scan)
-        uses: bridgecrewio/checkov-action@master
-        with:
-          directory: ${{ vars.INFRA_PATH }}
-          soft_fail: true
+          echo "Destroying runtime infra ONLY (IAM is excluded)"
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -42,40 +34,33 @@ jobs:
           role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Terraform destroy plan (runtime modules only)
+      - name: Terraform destroy plan
         id: plan
         uses: dflook/terraform-plan@v2
         with:
           path: ${{ vars.INFRA_PATH }}
           destroy: true
-          variables: |
-            cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag="${{ github.sha }}"
+
           target: |
             module.vpc
             module.alb
             module.ecs
             module.acm
             module.domain
+            # module.ecr   # ← uncomment ONLY if you want to delete the ECR repo too
 
-      - name: Terraform apply (destroy) (runtime modules only)
+          variables: |
+            cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            image_tag="${{ github.sha }}"
+
+      - name: Terraform apply
         uses: dflook/terraform-apply@v2
         with:
           path: ${{ vars.INFRA_PATH }}
           plan_path: ${{ steps.plan.outputs.plan_path }}
           auto_approve: true
-          variables: |
-            cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag="${{ github.sha }}"
-          target: |
-            module.vpc
-            module.alb
-            module.ecs
-            module.acm
-            module.domain
+
 
 
