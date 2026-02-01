@@ -43,10 +43,6 @@ resource "aws_iam_role" "github_actions_role" {
       }
     ]
   })
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_iam_policy" "terraform_state_access" {
@@ -92,10 +88,6 @@ resource "aws_iam_policy" "terraform_state_access" {
       }
     ]
   })
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach" {
@@ -218,6 +210,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_destroy_permissions_at
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_destroy_permissions.arn
 }
+
 
 
 
