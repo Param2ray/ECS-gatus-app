@@ -1,10 +1,27 @@
-web:
+wweb:
   port: 8080
 
 endpoints:
   - name: google
+    group: external
     url: https://www.google.com
     interval: 30s
     conditions:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 500"
+
+  - name: gatus-self
+    group: internal
+    url: http://localhost:8080/health
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: tm-homepage
+    group: app
+    url: https://tm.paramjyot2ray.com/
+    interval: 30s
+    conditions:
+      - "[STATUS] == 200"
+      - "[RESPONSE_TIME] < 800"
+
