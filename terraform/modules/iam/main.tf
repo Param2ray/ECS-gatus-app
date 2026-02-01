@@ -1,4 +1,3 @@
-# Create an IAM role for ECS tasks to acces ECR image
 resource "aws_iam_role" "ecs_task_execution_role" {
   name = "ecsTaskExecutionRole"
 
@@ -11,14 +10,92 @@ resource "aws_iam_role" "ecs_task_execution_role" {
         Principal = {
           Service = "ecs-tasks.amazonaws.com"
         }
-      },
+      }
     ]
   })
 }
 
-# Attach the AmazonECSTaskExecutionRolePolicy managed policy to the role
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
   role       = aws_iam_role.ecs_task_execution_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
+
+resource "aws_iam_role" "github_actions_role" {
+  name = "github-actions-deploy-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Principal = {
+          Federated = "arn:aws:iam::512378127667:oidc-provider/token.actions.githubusercontent.com"
+        }
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+          }
+          StringLike = {
+            "token.actions.githubusercontent.com:sub" = "repo:Param2ray/ecs-production-healthcheck-service:*"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_state_access" {
+  name        = "terraform-state-access"
+  description = "Allow GitHub Actions to read/write Terraform remote state in S3 and lock in DynamoDB"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      {
+        Sid    = "TerraformStateS3ListBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::ece-production-healthcheck-service"
+        ]
+      },
+
+      {
+        Sid    = "TerraformStateS3Objects"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::ece-production-healthcheck-service/*"
+        ]
+      },
+
+      {
+        Sid    = "TerraformStateDynamoLock"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:DescribeTable",
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = "arn:aws:dynamodb:ca-central-1:512378127667:table/terraform-state-lock"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach" {
+  role       = aws_iam_role.github_actions_role.name
+  policy_arn = aws_iam_policy.terraform_state_access.arn
+}
+
 
