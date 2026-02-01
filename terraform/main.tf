@@ -36,7 +36,7 @@ module "alb" {
 module "iam" {
   source = "./modules/iam"
 
-  enable_destroy_policy   = var.enable_destroy_policy
+  enable_destroy_policy    = var.enable_destroy_policy
   github_actions_role_name = var.github_actions_role_name
 }
 
