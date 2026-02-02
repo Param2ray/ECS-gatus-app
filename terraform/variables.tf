@@ -187,3 +187,9 @@ variable "execution_role_arn" {
   type        = string
   default     = ""
 }
+
+variable "ecr_repository_name" {
+  description = "ECR repo name for the app"
+  type        = string
+  default     = "vpc-gatus"
+}

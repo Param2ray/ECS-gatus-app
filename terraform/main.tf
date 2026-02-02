@@ -44,10 +44,10 @@ module "iam" {
 }
 
 module "ecr" {
-  source = "./modules/ecr"
-
-  name = var.name
+  source          = "./modules/ecr"
+  repository_name = var.ecr_repository_name
 }
+
 
 module "ecs" {
   source = "./modules/ecs"
@@ -68,6 +68,8 @@ module "ecs" {
   image_url             = "${module.ecr.repository_url}:${var.image_tag}"
   execution_role_arn    = module.iam.task_execution_role_arn
   execution_role_name   = module.iam.task_execution_role_name
+  ecr_repository_url    = module.ecr.repository_url
+  image_tag             = var.image_tag
 }
 
 data "aws_ssm_parameter" "ecs_secrets" {

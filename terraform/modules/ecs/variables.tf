@@ -80,3 +80,13 @@ variable "aws_region" {
   description = "AWS region to deploy resources in"
   type        = string
 }
+
+variable "ecr_repository_url" {
+  description = "ECR repository URL (without tag)"
+  type        = string
+}
+
+variable "image_tag" {
+  description = "Docker image tag (usually Git SHA)"
+  type        = string
+}
