@@ -12,7 +12,7 @@ data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-  
+
   name               = "ecsTaskExecutionRole"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_assume_role.json
 }
@@ -47,9 +47,9 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
 }
 
 resource "aws_iam_role" "github_actions_role" {
-  name               = var.github_actions_role_name
-  assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
-  max_session_duration = 3600
+  name                  = var.github_actions_role_name
+  assume_role_policy    = data.aws_iam_policy_document.github_actions_assume_role.json
+  max_session_duration  = 3600
   force_detach_policies = false
 }
 
@@ -61,9 +61,9 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "ACMRead"
-        Effect = "Allow"
-        Action = ["acm:DescribeCertificate", "acm:ListCertificates", "acm:ListTagsForCertificate"]
+        Sid      = "ACMRead"
+        Effect   = "Allow"
+        Action   = ["acm:DescribeCertificate", "acm:ListCertificates", "acm:ListTagsForCertificate"]
         Resource = "*"
       },
       {
