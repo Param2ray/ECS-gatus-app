@@ -38,7 +38,12 @@ module "iam" {
 
   enable_destroy_policy    = var.enable_destroy_policy
   github_actions_role_name = var.github_actions_role_name
+  github_repo              = var.github_repo
+  state_bucket_name        = var.state_bucket_name
+  lock_table_name          = var.lock_table_name
+  aws_region               = var.aws_region
 }
+
 
 module "ecr" {
   source = "./modules/ecr"
