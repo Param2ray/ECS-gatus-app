@@ -10,4 +10,4 @@
 terraform/.terraform.lock.hcl
 
 # Allow committing this one non-secret tfvars file for CI/CD
-!terraform/terraform.auto.tfvars
+!terraform/terraform.auto.tfvarsterraform/state-backup-*.json
