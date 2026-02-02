@@ -22,6 +22,12 @@ env:
   ECR_REPOSITORY: vpc-gatus
   IMAGE_TAG: ${{ github.sha }}
 
+  # Terraform IAM module inputs (kept here so plan/apply stay clean)
+  GITHUB_ACTIONS_ROLE_NAME: ${{ vars.GITHUB_ACTIONS_ROLE_NAME }}
+  GITHUB_REPO: ${{ vars.GITHUB_REPO }}
+  STATE_BUCKET_NAME: ${{ vars.STATE_BUCKET_NAME }}
+  LOCK_TABLE_NAME: ${{ vars.LOCK_TABLE_NAME }}
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -60,10 +66,18 @@ jobs:
         with:
           path: terraform
           variables: |
-            cloudflare_api_token   = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id     = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id  = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag              = "${{ env.IMAGE_TAG }}"
+            cloudflare_api_token     = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id       = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id    = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            image_tag                = "${{ env.IMAGE_TAG }}"
+
+            github_actions_role_name = "${{ env.GITHUB_ACTIONS_ROLE_NAME }}"
+            github_repo              = "${{ env.GITHUB_REPO }}"
+            state_bucket_name        = "${{ env.STATE_BUCKET_NAME }}"
+            lock_table_name          = "${{ env.LOCK_TABLE_NAME }}"
+            aws_region               = "${{ env.AWS_REGION }}"
+
+            enable_destroy_policy    = false
 
       - name: Terraform apply
         uses: dflook/terraform-apply@v2
@@ -71,10 +85,18 @@ jobs:
           path: terraform
           auto_approve: true
           variables: |
-            cloudflare_api_token   = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id     = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id  = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag              = "${{ env.IMAGE_TAG }}"
+            cloudflare_api_token     = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id       = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id    = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            image_tag                = "${{ env.IMAGE_TAG }}"
+
+            github_actions_role_name = "${{ env.GITHUB_ACTIONS_ROLE_NAME }}"
+            github_repo              = "${{ env.GITHUB_REPO }}"
+            state_bucket_name        = "${{ env.STATE_BUCKET_NAME }}"
+            lock_table_name          = "${{ env.LOCK_TABLE_NAME }}"
+            aws_region               = "${{ env.AWS_REGION }}"
+
+            enable_destroy_policy    = false
 
   health-check:
     name: Post-Deploy Health Check
@@ -97,6 +119,7 @@ jobs:
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
           echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
