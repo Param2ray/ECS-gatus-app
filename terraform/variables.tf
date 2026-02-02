@@ -154,13 +154,11 @@ variable "state_bucket_name" {
 variable "github_repo" {
   description = "GitHub repository for the application"
   type        = string
-  default     = "Param2ray/ecs-production-healthcheck-service"
 }
 
 variable "aws_region" {
   description = "AWS region to deploy resources"
   type        = string
-  default     = "ca-central-1"
 }
 
 variable "enable_destroy_policy" {
@@ -172,10 +170,8 @@ variable "enable_destroy_policy" {
 variable "github_actions_role_name" {
   description = "Name of the GitHub Actions IAM role (OIDC)"
   type        = string
-  default     = ""
 }
 
 variable "lock_table_name" {
   type    = string
-  default = "terraform-state-lock"
 }
