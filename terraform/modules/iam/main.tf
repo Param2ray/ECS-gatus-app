@@ -12,7 +12,6 @@ data "aws_iam_policy_document" "ecs_task_execution_assume_role" {
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
-
   name               = "ecsTaskExecutionRole"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_assume_role.json
 }
@@ -81,6 +80,18 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
         ]
         Resource = "*"
       },
+
+      # ✅ ADD THIS BLOCK (fixes your failure)
+      {
+        Sid    = "CloudWatchLogsRead"
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups",
+          "logs:ListTagsForResource"
+        ]
+        Resource = "*"
+      },
+
       {
         Sid    = "IAMRead"
         Effect = "Allow"
@@ -142,6 +153,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_runtime_destroy[0].arn
 }
+
 
 
 
