@@ -173,5 +173,17 @@ variable "github_actions_role_name" {
 }
 
 variable "lock_table_name" {
-  type    = string
+  type = string
+}
+
+variable "manage_iam" {
+  description = "If true, Terraform will create/manage IAM resources (bootstrap only). Keep false for runtime deploy."
+  type        = bool
+  default     = false
+}
+
+variable "execution_role_arn" {
+  description = "Existing ECS task execution role ARN (used when manage_iam=false)"
+  type        = string
+  default     = ""
 }

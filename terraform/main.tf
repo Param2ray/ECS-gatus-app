@@ -36,14 +36,12 @@ module "alb" {
 module "iam" {
   source = "./modules/iam"
 
-  enable_destroy_policy    = var.enable_destroy_policy
-  github_actions_role_name = var.github_actions_role_name
+  aws_region               = var.aws_region
   github_repo              = var.github_repo
+  github_actions_role_name = var.github_actions_role_name
   state_bucket_name        = var.state_bucket_name
   lock_table_name          = var.lock_table_name
-  aws_region               = var.aws_region
 }
-
 
 module "ecr" {
   source = "./modules/ecr"
@@ -54,26 +52,22 @@ module "ecr" {
 module "ecs" {
   source = "./modules/ecs"
 
+  aws_region            = var.aws_region
   cluster_name          = var.cluster_name
-  container_name        = var.container_name
   ecs_launch_type       = var.ecs_launch_type
   desired_count         = var.desired_count
-  container_port        = var.container_port
   cpu                   = var.cpu
   memory                = var.memory
+  container_port        = var.container_port
+  container_name        = var.container_name
+  task_family           = var.task_family
   vpc_id                = module.vpc.vpc_id
-  image_url             = "${module.ecr.repository_url}:${var.image_tag}"
-  http_listener_arn     = module.alb.http_listener_arn
-  https_listener_arn    = module.alb.https_listener_arn
-  iam_role_arn          = module.iam.task_execution_role_arn
   private_subnet_ids    = module.vpc.private_subnet_ids
   target_group_arn      = module.alb.target_group_arn
   alb_security_group_id = module.alb.alb_sg_id
-  task_name             = var.task_name
-  depends_on            = [module.alb]
+  image_url             = "${module.ecr.repository_url}:${var.image_tag}"
   execution_role_arn    = module.iam.task_execution_role_arn
   execution_role_name   = module.iam.task_execution_role_name
-  task_family           = var.task_family
 }
 
 data "aws_ssm_parameter" "ecs_secrets" {

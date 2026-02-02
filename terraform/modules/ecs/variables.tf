@@ -23,7 +23,6 @@ variable "cpu" {
 variable "memory" {
   description = "Memory (MiB) for ECS task"
   type        = number
-
 }
 
 variable "container_port" {
@@ -33,21 +32,6 @@ variable "container_port" {
 
 variable "vpc_id" {
   description = "VPC ID where ECS will be deployed"
-  type        = string
-}
-
-variable "http_listener_arn" {
-  description = "ARN of the HTTP listener from ALB"
-  type        = string
-}
-
-variable "https_listener_arn" {
-  description = "ARN of the HTTPS listener from ALB"
-  type        = string
-}
-
-variable "iam_role_arn" {
-  description = "ARN of the IAM role for ECS task execution"
   type        = string
 }
 
@@ -68,25 +52,13 @@ variable "alb_security_group_id" {
 
 variable "image_url" {
   type        = string
-  description = "Name which you want to name your container"
-
-}
-
-variable "task_name" {
-  description = "Name which you want to name your task"
-  type        = string
-
+  description = "Full container image URI (ECR repo + tag)"
 }
 
 variable "container_name" {
-  description = "Name which you want to name your container"
+  description = "Container name in the task definition"
   type        = string
   default     = "gatus"
-}
-
-variable "execution_role_arn" {
-  description = "IAM execution role ARN for ECS tasks (pull ECR, write logs)"
-  type        = string
 }
 
 variable "task_family" {
@@ -94,7 +66,17 @@ variable "task_family" {
   type        = string
 }
 
+variable "execution_role_arn" {
+  description = "IAM execution role ARN for ECS tasks (pull ECR, write logs)"
+  type        = string
+}
+
 variable "execution_role_name" {
   description = "Name of the ECS task execution role (used for IAM policy attachments)"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region to deploy resources in"
   type        = string
 }

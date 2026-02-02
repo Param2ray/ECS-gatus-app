@@ -3,6 +3,12 @@ data "aws_ssm_parameter" "ecs_secrets" {
   name = "ecs_secrets"
 }
 
+# Optional but recommended: create the log group used by awslogs
+resource "aws_cloudwatch_log_group" "ecs" {
+  name              = "/ecs/${var.cluster_name}"
+  retention_in_days = 7
+}
+
 # 2) Create an IAM policy to allow ECS tasks to read that parameter
 resource "aws_iam_policy" "ecs_read_ssm" {
   name = "ecs-read-ssm-parameter"
@@ -21,7 +27,8 @@ resource "aws_iam_policy" "ecs_read_ssm" {
     ]
   })
 }
-# 3) Attach the policy to the ECS task execution role
+
+# 3) Attach the policy to the ECS task execution role (ROLE NAME, not ARN)
 resource "aws_iam_role_policy_attachment" "ecs_read_ssm_attach" {
   role       = var.execution_role_name
   policy_arn = aws_iam_policy.ecs_read_ssm.arn
@@ -82,6 +89,15 @@ resource "aws_ecs_task_definition" "ecs_task" {
         }
       ]
 
+      logConfiguration = {
+        logDriver = "awslogs"
+        options = {
+          awslogs-group         = aws_cloudwatch_log_group.ecs.name
+          awslogs-region        = var.aws_region
+          awslogs-stream-prefix = var.container_name
+        }
+      }
+
       secrets = [
         {
           name      = "ECS_SECRETS"
@@ -94,6 +110,11 @@ resource "aws_ecs_task_definition" "ecs_task" {
   tags = {
     Name = "Project_task_definition"
   }
+
+  depends_on = [
+    aws_iam_role_policy_attachment.ecs_read_ssm_attach,
+    aws_cloudwatch_log_group.ecs
+  ]
 }
 
 # 7) ECS Service
@@ -101,7 +122,7 @@ resource "aws_ecs_service" "ecs_service" {
   name            = "project_ecs_service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.ecs_task.arn
-  desired_count   = 2
+  desired_count   = var.desired_count
   launch_type     = var.ecs_launch_type
 
   network_configuration {
@@ -119,4 +140,8 @@ resource "aws_ecs_service" "ecs_service" {
   tags = {
     Name = "Project_ecs_service"
   }
+
+  depends_on = [aws_iam_role_policy_attachment.ecs_read_ssm_attach]
 }
+
+
