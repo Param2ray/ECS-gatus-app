@@ -17,12 +17,6 @@ resource "aws_iam_role" "ecs_task_execution_role" {
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_assume_role.json
 }
 
-# Keep the original resource name that exists in your state:
-resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy_attachment" {
-  role       = aws_iam_role.ecs_task_execution_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
-}
-
 data "aws_caller_identity" "current" {}
 
 # Assume role policy for GitHub OIDC (standard)
@@ -57,40 +51,6 @@ resource "aws_iam_role" "github_actions_role" {
   assume_role_policy = data.aws_iam_policy_document.github_actions_assume_role.json
   max_session_duration = 3600
   force_detach_policies = false
-}
-
-resource "aws_iam_policy" "terraform_state_access" {
-  name        = "terraform-state-access"
-  description = "Allow GitHub Actions to read/write Terraform remote state in S3 and lock in DynamoDB"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "TerraformStateS3ListBucket"
-        Effect = "Allow"
-        Action = ["s3:ListBucket"]
-        Resource = ["arn:aws:s3:::${var.state_bucket_name}"]
-      },
-      {
-        Sid    = "TerraformStateS3Objects"
-        Effect = "Allow"
-        Action = ["s3:GetObject", "s3:PutObject", "s3:DeleteObject"]
-        Resource = ["arn:aws:s3:::${var.state_bucket_name}/*"]
-      },
-      {
-        Sid    = "TerraformStateDynamoLock"
-        Effect = "Allow"
-        Action = ["dynamodb:DescribeTable", "dynamodb:GetItem", "dynamodb:PutItem", "dynamodb:DeleteItem", "dynamodb:UpdateItem"]
-        Resource = "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${var.lock_table_name}"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy_attachment" "github_actions_terraform_state_attach" {
-  role       = aws_iam_role.github_actions_role.name
-  policy_arn = aws_iam_policy.terraform_state_access.arn
 }
 
 resource "aws_iam_role_policy" "github_actions_terraform_read" {
