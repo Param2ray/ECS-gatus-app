@@ -18,9 +18,10 @@ permissions:
   contents: read
 
 env:
-  AWS_REGION: ${{ vars.AWS_REGION }}
+  AWS_REGION: ca-central-1
   ECR_REPOSITORY: vpc-gatus
   IMAGE_TAG: ${{ github.sha }}
+  TF_VAR_image_tag: ${{ github.sha }}
 
   ACTIONS_ROLE_NAME: ${{ vars.ACTIONS_ROLE_NAME }}
   REPO_NAME: ${{ vars.REPO_NAME }}
@@ -117,6 +118,7 @@ jobs:
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
           echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
