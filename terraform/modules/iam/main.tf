@@ -18,7 +18,6 @@ resource "aws_iam_role" "ecs_task_execution_role" {
 
 data "aws_caller_identity" "current" {}
 
-# Assume role policy for GitHub OIDC (standard)
 data "aws_iam_policy_document" "github_actions_assume_role" {
   statement {
     effect = "Allow"
@@ -36,7 +35,6 @@ data "aws_iam_policy_document" "github_actions_assume_role" {
       values   = ["sts.amazonaws.com"]
     }
 
-    # repo:OWNER/REPO:*  (matches your repo)
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
@@ -80,8 +78,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
         ]
         Resource = "*"
       },
-
-      # ✅ ADD THIS BLOCK (fixes your failure)
       {
         Sid    = "CloudWatchLogsRead"
         Effect = "Allow"
@@ -91,7 +87,6 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
         ]
         Resource = "*"
       },
-
       {
         Sid    = "IAMRead"
         Effect = "Allow"
@@ -105,6 +100,174 @@ resource "aws_iam_role_policy" "github_actions_terraform_read" {
           "iam:ListPolicyVersions"
         ]
         Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "github_actions_terraform_deploy" {
+  name = "terraform-deploy-runtime"
+  role = aws_iam_role.github_actions_role.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      {
+        Sid    = "ACMWrite"
+        Effect = "Allow"
+        Action = [
+          "acm:RequestCertificate",
+          "acm:DeleteCertificate",
+          "acm:AddTagsToCertificate",
+          "acm:RemoveTagsFromCertificate"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "CloudWatchLogsWrite"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:PutRetentionPolicy",
+          "logs:TagLogGroup",
+          "logs:UntagLogGroup"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "ECSWrite"
+        Effect = "Allow"
+        Action = [
+          "ecs:CreateCluster",
+          "ecs:DeleteCluster",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:CreateService",
+          "ecs:UpdateService",
+          "ecs:DeleteService",
+          "ecs:TagResource",
+          "ecs:UntagResource"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "ELBv2Write"
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:SetSecurityGroups",
+          "elasticloadbalancing:SetSubnets",
+
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
+
+          "elasticloadbalancing:AddTags",
+          "elasticloadbalancing:RemoveTags"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "EC2VpcNetworkingWrite"
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:ModifyVpcAttribute",
+
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:ModifySubnetAttribute",
+
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DetachInternetGateway",
+          "ec2:DeleteInternetGateway",
+
+          "ec2:CreateRouteTable",
+          "ec2:DeleteRouteTable",
+          "ec2:CreateRoute",
+          "ec2:ReplaceRoute",
+          "ec2:DeleteRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:DisassociateRouteTable",
+          "ec2:ReplaceRouteTableAssociation",
+
+          "ec2:CreateSecurityGroup",
+          "ec2:DeleteSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+
+          "ec2:AllocateAddress",
+          "ec2:ReleaseAddress",
+
+          "ec2:CreateNatGateway",
+          "ec2:DeleteNatGateway",
+
+          "ec2:CreateTags",
+          "ec2:DeleteTags"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid    = "IAMWriteForTerraform"
+        Effect = "Allow"
+        Action = [
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:CreatePolicyVersion",
+          "iam:DeletePolicyVersion",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:UpdateAssumeRolePolicy",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:TagRole",
+          "iam:UntagRole"
+        ]
+        Resource = "*"
+      },
+
+      {
+        Sid      = "AllowPassRoleToECS"
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
+        Resource = "*"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
+      },
+
+      {
+        Sid      = "SSMReadEcsSecrets"
+        Effect   = "Allow"
+        Action   = ["ssm:GetParameter", "ssm:GetParameters"]
+        Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/ecs_secrets"
       }
     ]
   })
@@ -153,6 +316,7 @@ resource "aws_iam_role_policy_attachment" "github_actions_runtime_destroy_attach
   role       = aws_iam_role.github_actions_role.name
   policy_arn = aws_iam_policy.github_actions_runtime_destroy[0].arn
 }
+
 
 
 
