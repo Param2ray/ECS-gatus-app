@@ -66,6 +66,7 @@ jobs:
         uses: dflook/terraform-plan@v2
         with:
           path: terraform
+          refresh: false
           variables: |
             cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
             cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
@@ -84,6 +85,7 @@ jobs:
         with:
           path: terraform
           auto_approve: true
+          refresh: false
           variables: |
             cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
             cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
@@ -118,6 +120,7 @@ jobs:
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
           echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
