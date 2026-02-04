@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "terraform/runtime/**"
+      - "terraform/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -48,18 +48,18 @@ jobs:
       - name: Run Checkov (IaC scan)
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: terraform/runtime
+          directory: terraform
           soft_fail: true
 
       - name: Terraform validate
         uses: dflook/terraform-validate@v2
         with:
-          path: terraform/runtime
+          path: terraform
 
       - name: Terraform plan
         uses: dflook/terraform-plan@v2
         with:
-          path: terraform/runtime
+          path: terraform
           refresh: false
           variables: |
             cloudflare_api_token  = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
@@ -71,7 +71,7 @@ jobs:
       - name: Terraform apply
         uses: dflook/terraform-apply@v2
         with:
-          path: terraform/runtime
+          path: terraform
           auto_approve: true
           refresh: false
           variables: |
@@ -102,6 +102,8 @@ jobs:
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
           echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
+
 
 
 
