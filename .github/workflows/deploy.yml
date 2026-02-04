@@ -4,8 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "terraform/**"
-      - "terraform-bootstrap/**"
+      - "terraform/runtime/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -22,11 +21,6 @@ env:
   ECR_REPOSITORY: vpc-gatus
   IMAGE_TAG: ${{ github.sha }}
   TF_VAR_image_tag: ${{ github.sha }}
-
-  ACTIONS_ROLE_NAME: ${{ vars.ACTIONS_ROLE_NAME }}
-  REPO_NAME: ${{ vars.REPO_NAME }}
-  STATE_BUCKET_NAME: ${{ vars.STATE_BUCKET_NAME }}
-  LOCK_TABLE_NAME: ${{ vars.LOCK_TABLE_NAME }}
 
 jobs:
   terraform:
@@ -54,50 +48,38 @@ jobs:
       - name: Run Checkov (IaC scan)
         uses: bridgecrewio/checkov-action@master
         with:
-          directory: terraform
+          directory: terraform/runtime
           soft_fail: true
 
       - name: Terraform validate
         uses: dflook/terraform-validate@v2
         with:
-          path: terraform
+          path: terraform/runtime
 
       - name: Terraform plan
         uses: dflook/terraform-plan@v2
         with:
-          path: terraform
+          path: terraform/runtime
           refresh: false
           variables: |
-            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag                 = "${{ env.IMAGE_TAG }}"
-
-            github_actions_role_name  = "${{ env.ACTIONS_ROLE_NAME }}"
-            github_repo               = "${{ env.REPO_NAME }}"
-            state_bucket_name         = "${{ env.STATE_BUCKET_NAME }}"
-            lock_table_name           = "${{ env.LOCK_TABLE_NAME }}"
-            aws_region                = "${{ env.AWS_REGION }}"
-            enable_destroy_policy     = false
+            cloudflare_api_token  = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id    = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            image_tag             = "${{ env.IMAGE_TAG }}"
+            aws_region            = "${{ env.AWS_REGION }}"
 
       - name: Terraform apply
         uses: dflook/terraform-apply@v2
         with:
-          path: terraform
+          path: terraform/runtime
           auto_approve: true
           refresh: false
           variables: |
-            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag                 = "${{ env.IMAGE_TAG }}"
-
-            github_actions_role_name  = "${{ env.ACTIONS_ROLE_NAME }}"
-            github_repo               = "${{ env.REPO_NAME }}"
-            state_bucket_name         = "${{ env.STATE_BUCKET_NAME }}"
-            lock_table_name           = "${{ env.LOCK_TABLE_NAME }}"
-            aws_region                = "${{ env.AWS_REGION }}"
-            enable_destroy_policy     = false
+            cloudflare_api_token  = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id    = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+            image_tag             = "${{ env.IMAGE_TAG }}"
+            aws_region            = "${{ env.AWS_REGION }}"
 
   health-check:
     name: Post-Deploy Health Check
