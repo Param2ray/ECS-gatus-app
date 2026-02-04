@@ -101,7 +101,8 @@ jobs:
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
-          echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "App URL: https://${{ vars.FULL_DOMAIN }}"
+
 
 
 

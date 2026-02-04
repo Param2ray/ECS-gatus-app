@@ -25,10 +25,14 @@ terraform {
   }
 }
 
-# AWS Provider Configuration
 provider "aws" {
-  region = "ca-central-1"
+  region = var.aws_region
+}
 
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
 }
 
 # Cloudflare Provider Configuration

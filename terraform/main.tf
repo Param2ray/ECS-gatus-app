@@ -1,13 +1,3 @@
-provider "aws" {
-  region = var.aws_region
-}
-
-data "aws_caller_identity" "current" {}
-
-locals {
-  account_id = data.aws_caller_identity.current.account_id
-}
-
 module "vpc" {
   source = "./modules/vpc"
 
@@ -66,8 +56,8 @@ module "ecs" {
   target_group_arn      = module.alb.target_group_arn
   alb_security_group_id = module.alb.alb_sg_id
   image_url             = "${module.ecr.repository_url}:${var.image_tag}"
-  execution_role_arn  = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
-  execution_role_name = "ecsTaskExecutionRole"
+  execution_role_arn    = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
+  execution_role_name   = "ecsTaskExecutionRole"
   ecr_repository_url    = module.ecr.repository_url
   image_tag             = var.image_tag
 }
