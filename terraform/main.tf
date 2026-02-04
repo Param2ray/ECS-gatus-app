@@ -1,3 +1,13 @@
+provider "aws" {
+  region = var.aws_region
+}
+
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}
+
 module "vpc" {
   source = "./modules/vpc"
 
@@ -33,16 +43,6 @@ module "alb" {
   container_port      = var.container_port
 }
 
-module "iam" {
-  source = "./modules/iam"
-
-  aws_region               = var.aws_region
-  github_repo              = var.github_repo
-  github_actions_role_name = var.github_actions_role_name
-  state_bucket_name        = var.state_bucket_name
-  lock_table_name          = var.lock_table_name
-}
-
 module "ecr" {
   source          = "./modules/ecr"
   repository_name = var.ecr_repository_name
@@ -66,8 +66,8 @@ module "ecs" {
   target_group_arn      = module.alb.target_group_arn
   alb_security_group_id = module.alb.alb_sg_id
   image_url             = "${module.ecr.repository_url}:${var.image_tag}"
-  execution_role_arn    = module.iam.task_execution_role_arn
-  execution_role_name   = module.iam.task_execution_role_name
+  execution_role_arn  = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
+  execution_role_name = "ecsTaskExecutionRole"
   ecr_repository_url    = module.ecr.repository_url
   image_tag             = var.image_tag
 }
