@@ -13,3 +13,13 @@ variable "github_repo" {
   }
 }
 
+variable "state_bucket" {
+  type        = string
+  description = "S3 bucket name for Terraform remote state"
+}
+
+variable "lock_table_arn" {
+  type        = string
+  description = "ARN of DynamoDB table used for Terraform state locking"
+}
+

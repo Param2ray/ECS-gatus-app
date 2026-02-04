@@ -2,12 +2,16 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Use the existing GitHub OIDC provider (do NOT try to create it in main stack)
+data "aws_caller_identity" "current" {}
+
+locals {
+  account_id = data.aws_caller_identity.current.account_id
+}
+
 data "aws_iam_openid_connect_provider" "github" {
   url = "https://token.actions.githubusercontent.com"
 }
 
-# Role GitHub Actions assumes via OIDC
 resource "aws_iam_role" "github_actions" {
   name = "github-actions-deploy-role"
 
@@ -33,7 +37,6 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-# Policy: allow Terraform to read/write remote state (S3) and use DynamoDB locking
 resource "aws_iam_policy" "terraform_backend" {
   name        = "terraform-backend-access"
   description = "Access to Terraform S3 state and DynamoDB lock table"
@@ -77,8 +80,6 @@ resource "aws_iam_role_policy_attachment" "attach_backend_policy" {
   policy_arn = aws_iam_policy.terraform_backend.arn
 }
 
-# ✅ FIX for your errors:
-# Allow GitHub Actions role to read SSM parameter + read IAM role during terraform plan/apply
 resource "aws_iam_policy" "github_actions_extra" {
   name        = "github-actions-extra-permissions"
   description = "SSM + IAM read permissions needed by Terraform from GitHub Actions"
@@ -94,13 +95,13 @@ resource "aws_iam_policy" "github_actions_extra" {
           "ssm:GetParameters",
           "ssm:GetParameterHistory"
         ]
-        Resource = "arn:aws:ssm:${var.aws_region}:512378127667:parameter/ecs_secrets"
+        Resource = "arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter/ecs_secrets"
       },
       {
         Sid      = "ReadEcsExecutionRole"
         Effect   = "Allow"
         Action   = ["iam:GetRole"]
-        Resource = "arn:aws:iam::512378127667:role/ecsTaskExecutionRole"
+        Resource = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
       }
     ]
   })
@@ -109,5 +110,146 @@ resource "aws_iam_policy" "github_actions_extra" {
 resource "aws_iam_role_policy_attachment" "attach_extra_policy" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.github_actions_extra.arn
+}
+
+resource "aws_iam_policy" "github_actions_runtime_deploy" {
+  name        = "github-actions-runtime-deploy"
+  description = "Allow GitHub Actions to deploy runtime infrastructure (no IAM)"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+
+      # --- VPC / Networking ---
+      {
+        Sid    = "EC2VpcNetworking"
+        Effect = "Allow"
+        Action = [
+          "ec2:CreateVpc",
+          "ec2:DeleteVpc",
+          "ec2:ModifyVpcAttribute",
+          "ec2:CreateSubnet",
+          "ec2:DeleteSubnet",
+          "ec2:ModifySubnetAttribute",
+          "ec2:CreateInternetGateway",
+          "ec2:AttachInternetGateway",
+          "ec2:DetachInternetGateway",
+          "ec2:DeleteInternetGateway",
+          "ec2:CreateRouteTable",
+          "ec2:DeleteRouteTable",
+          "ec2:CreateRoute",
+          "ec2:ReplaceRoute",
+          "ec2:DeleteRoute",
+          "ec2:AssociateRouteTable",
+          "ec2:DisassociateRouteTable",
+          "ec2:ReplaceRouteTableAssociation",
+          "ec2:CreateSecurityGroup",
+          "ec2:DeleteSecurityGroup",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:AllocateAddress",
+          "ec2:ReleaseAddress",
+          "ec2:CreateNatGateway",
+          "ec2:DeleteNatGateway",
+          "ec2:CreateTags",
+          "ec2:DeleteTags"
+        ]
+        Resource = "*"
+      },
+
+      # --- Load Balancer ---
+      {
+        Sid    = "ELBv2"
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:SetSecurityGroups",
+          "elasticloadbalancing:SetSubnets",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
+          "elasticloadbalancing:AddTags",
+          "elasticloadbalancing:RemoveTags"
+        ]
+        Resource = "*"
+      },
+
+      # --- ECS ---
+      {
+        Sid    = "ECSDeploy"
+        Effect = "Allow"
+        Action = [
+          "ecs:CreateCluster",
+          "ecs:DeleteCluster",
+          "ecs:RegisterTaskDefinition",
+          "ecs:DeregisterTaskDefinition",
+          "ecs:CreateService",
+          "ecs:UpdateService",
+          "ecs:DeleteService",
+          "ecs:Describe*",
+          "ecs:TagResource",
+          "ecs:UntagResource"
+        ]
+        Resource = "*"
+      },
+
+      # --- CloudWatch Logs ---
+      {
+        Sid    = "CloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:DeleteLogGroup",
+          "logs:PutRetentionPolicy",
+          "logs:DescribeLogGroups",
+          "logs:TagLogGroup",
+          "logs:UntagLogGroup"
+        ]
+        Resource = "*"
+      },
+
+      # --- ACM ---
+      {
+        Sid    = "ACM"
+        Effect = "Allow"
+        Action = [
+          "acm:RequestCertificate",
+          "acm:DeleteCertificate",
+          "acm:AddTagsToCertificate",
+          "acm:RemoveTagsFromCertificate",
+          "acm:DescribeCertificate"
+        ]
+        Resource = "*"
+      },
+
+      # --- Allow ECS to assume its execution role ---
+      {
+        Sid    = "PassRoleToECS"
+        Effect = "Allow"
+        Action = "iam:PassRole"
+        Resource = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
+        Condition = {
+          StringEquals = {
+            "iam:PassedToService" = "ecs-tasks.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "attach_runtime_deploy_policy" {
+  role       = aws_iam_role.github_actions.name
+  policy_arn = aws_iam_policy.github_actions_runtime_deploy.arn
 }
 
