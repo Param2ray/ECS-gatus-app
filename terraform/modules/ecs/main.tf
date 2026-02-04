@@ -9,31 +9,6 @@ resource "aws_cloudwatch_log_group" "ecs" {
   retention_in_days = 7
 }
 
-# 2) Create an IAM policy to allow ECS tasks to read that parameter
-resource "aws_iam_policy" "ecs_read_ssm" {
-  name = "ecs-read-ssm-parameter"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = data.aws_ssm_parameter.ecs_secrets.arn
-      }
-    ]
-  })
-}
-
-# 3) Attach the policy to the ECS task execution role (ROLE NAME, not ARN)
-resource "aws_iam_role_policy_attachment" "ecs_read_ssm_attach" {
-  role       = var.execution_role_name
-  policy_arn = aws_iam_policy.ecs_read_ssm.arn
-}
-
 # 4) Security group for ECS tasks
 resource "aws_security_group" "ecs_sg" {
   name        = "ecs_sg"
@@ -112,7 +87,6 @@ resource "aws_ecs_task_definition" "ecs_task" {
   }
 
   depends_on = [
-    aws_iam_role_policy_attachment.ecs_read_ssm_attach,
     aws_cloudwatch_log_group.ecs
   ]
 }
@@ -141,7 +115,7 @@ resource "aws_ecs_service" "ecs_service" {
     Name = "Project_ecs_service"
   }
 
-  depends_on = [aws_iam_role_policy_attachment.ecs_read_ssm_attach]
+  depends_on = [aws_cloudwatch_log_group.ecs]
 }
 
 
