@@ -1,70 +1,78 @@
-name: Terraform Destroy
+name: Terraform Destroy (Runtime)
 
 on:
   workflow_dispatch:
     inputs:
       terraform_destroy:
-        description: 'Type "DESTROY" to confirm. This will delete runtime infrastructure.'
+        description: 'Type "DESTROY" to confirm'
         required: true
+        type: string
 
 permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: ca-central-1
+  INFRA_PATH: terraform
+  IMAGE_TAG: ${{ github.sha }}
+
 jobs:
   destroy:
-    name: Terraform Destroy
     runs-on: ubuntu-latest
-
     if: ${{ inputs.terraform_destroy == 'DESTROY' }}
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Show destroy context
-        run: |
-          echo "INFRA_PATH = ${{ vars.INFRA_PATH }}"
-          echo "AWS_REGION = ${{ vars.AWS_REGION }}"
-          echo "Destroying runtime modules only (keeping IAM + ECR)"
-
-      - name: Configure AWS Credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Terraform destroy plan (runtime only)
+      - name: Terraform destroy plan
         id: plan
         uses: dflook/terraform-plan@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: ${{ env.INFRA_PATH }}
           destroy: true
-          target: |
-            module.vpc
-            module.alb
-            module.ecs
-            module.acm
-            module.domain
+          refresh: false
           variables: |
-            cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ secrets.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-            github_actions_role_name="${{ secrets.OIDC_ROLE_NAME }}"
-            image_tag="${{ github.sha }}"
+            name                 = "${{ vars.NAME }}"
+            vpc_cidr             = "${{ vars.VPC_CIDR }}"
+            az_count              = ${{ vars.AZ_COUNT }}
+            availability_zones   = ${{ vars.AVAILABILITY_ZONES_JSON }}
+            public_subnet_cidrs  = ${{ vars.PUBLIC_SUBNET_CIDRS_JSON }}
+            private_subnet_cidrs = ${{ vars.PRIVATE_SUBNET_CIDRS_JSON }}
+
+            domain_name          = "${{ vars.DOMAIN_NAME }}"
+            subdomain            = "${{ vars.SUBDOMAIN }}"
+            zone_name            = "${{ vars.ZONE_NAME }}"
+
+            cloudflare_api_token  = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id    = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+
+            aws_region           = "${{ env.AWS_REGION }}"
+            cluster_name         = "${{ vars.CLUSTER_NAME }}"
+            container_name       = "${{ vars.CONTAINER_NAME }}"
+            task_family          = "${{ vars.TASK_FAMILY }}"
+            task_name            = "${{ vars.TASK_NAME }}"
+
+            image_tag            = "${{ env.IMAGE_TAG }}"
+            ecr_repository_url   = "${{ vars.ECR_REPOSITORY_URL }}"
+
+            github_repo               = "${{ vars.REPO_NAME }}"
+            github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
+            lock_table_name           = "${{ vars.LOCK_TABLE_NAME }}"
 
       - name: Terraform apply (destroy)
         uses: dflook/terraform-apply@v2
         with:
-          path: ${{ vars.INFRA_PATH }}
+          path: ${{ env.INFRA_PATH }}
           plan_path: ${{ steps.plan.outputs.plan_path }}
           auto_approve: true
-          variables: |
-            cloudflare_api_token="${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id="${{ secrets.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id="${{ secrets.CLOUDFLARE_ACCOUNT_ID }}"
-            github_actions_role_name="${{ secrets.OIDC_ROLE_NAME }}"
-            image_tag="${{ github.sha }}"
+
 
 
 
