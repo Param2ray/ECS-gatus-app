@@ -120,7 +120,6 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
     Version = "2012-10-17"
     Statement = [
 
-      # --- VPC / Networking ---
       {
         Sid    = "EC2VpcNetworking"
         Effect = "Allow"
@@ -159,7 +158,6 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
         Resource = "*"
       },
 
-      # --- Load Balancer ---
       {
         Sid    = "ELBv2"
         Effect = "Allow"
@@ -184,7 +182,6 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
         Resource = "*"
       },
 
-      # --- ECS ---
       {
         Sid    = "ECSDeploy"
         Effect = "Allow"
@@ -203,7 +200,6 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
         Resource = "*"
       },
 
-      # --- CloudWatch Logs ---
       {
         Sid    = "CloudWatchLogs"
         Effect = "Allow"
@@ -218,7 +214,6 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
         Resource = "*"
       },
 
-      # --- ACM ---
       {
         Sid    = "ACM"
         Effect = "Allow"
@@ -232,11 +227,10 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
         Resource = "*"
       },
 
-      # --- Allow ECS to assume its execution role ---
       {
-        Sid    = "PassRoleToECS"
-        Effect = "Allow"
-        Action = "iam:PassRole"
+        Sid      = "PassRoleToECS"
+        Effect   = "Allow"
+        Action   = "iam:PassRole"
         Resource = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
         Condition = {
           StringEquals = {
@@ -253,3 +247,32 @@ resource "aws_iam_role_policy_attachment" "attach_runtime_deploy_policy" {
   policy_arn = aws_iam_policy.github_actions_runtime_deploy.arn
 }
 
+data "aws_iam_role" "ecs_task_execution_role" {
+  name = "ecsTaskExecutionRole"
+}
+
+resource "aws_iam_policy" "ecs_exec_ssm_read" {
+  name        = "ecs-exec-ssm-read-ecs-secrets"
+  description = "Allow ecsTaskExecutionRole to read SSM parameter ecs_secrets"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadEcsSecretsParameter"
+        Effect = "Allow"
+        Action = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
+        ]
+        Resource = "arn:aws:ssm:${var.aws_region}:${local.account_id}:parameter/ecs_secrets"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecs_exec_ssm_attach" {
+  role       = data.aws_iam_role.ecs_task_execution_role.name
+  policy_arn = aws_iam_policy.ecs_exec_ssm_read.arn
+}
