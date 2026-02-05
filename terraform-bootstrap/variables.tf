@@ -23,3 +23,8 @@ variable "lock_table_arn" {
   description = "ARN of DynamoDB table used for Terraform state locking"
 }
 
+variable "ecr_repository_name" {
+  type        = string
+  description = "ECR repository name (e.g., vpc-gatus)"
+}
+

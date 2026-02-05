@@ -276,3 +276,15 @@ resource "aws_iam_role_policy_attachment" "ecs_exec_ssm_attach" {
   role       = data.aws_iam_role.ecs_task_execution_role.name
   policy_arn = aws_iam_policy.ecs_exec_ssm_read.arn
 }
+
+resource "aws_ecr_repository" "gatus_app" {
+  name = var.ecr_repository_name
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
