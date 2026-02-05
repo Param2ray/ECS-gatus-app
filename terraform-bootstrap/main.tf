@@ -148,10 +148,15 @@ resource "aws_iam_policy" "github_actions_runtime_deploy" {
           "ec2:AuthorizeSecurityGroupEgress",
           "ec2:RevokeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupEgress",
+
           "ec2:AllocateAddress",
           "ec2:ReleaseAddress",
+          "ec2:AssociateAddress",
+          "ec2:DisassociateAddress",
+
           "ec2:CreateNatGateway",
           "ec2:DeleteNatGateway",
+
           "ec2:CreateTags",
           "ec2:DeleteTags"
         ]
