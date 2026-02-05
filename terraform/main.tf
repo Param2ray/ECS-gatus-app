@@ -31,13 +31,8 @@ module "alb" {
   https_listener_port = var.https_listener_port
   certificate_arn     = module.acm.acm_certificate_arn
   container_port      = var.container_port
-}
 
-module "ecr" {
-  source          = "./modules/ecr"
-  repository_name = var.ecr_repository_name
 }
-
 
 module "ecs" {
   source = "./modules/ecs"
@@ -55,10 +50,10 @@ module "ecs" {
   private_subnet_ids    = module.vpc.private_subnet_ids
   target_group_arn      = module.alb.target_group_arn
   alb_security_group_id = module.alb.alb_sg_id
-  image_url             = "${module.ecr.repository_url}:${var.image_tag}"
+  image_url             = "${var.ecr_repository_url}:${var.image_tag}"
   execution_role_arn    = "arn:aws:iam::${local.account_id}:role/ecsTaskExecutionRole"
   execution_role_name   = "ecsTaskExecutionRole"
-  ecr_repository_url    = module.ecr.repository_url
+  ecr_repository_url    = var.ecr_repository_url
   image_tag             = var.image_tag
 }
 

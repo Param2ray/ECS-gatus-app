@@ -65,8 +65,10 @@ jobs:
             cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
             cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
             cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag                 = "${{ env.IMAGE_TAG }}"
+
             aws_region                = "${{ env.AWS_REGION }}"
+            image_tag                 = "${{ env.IMAGE_TAG }}"
+            ecr_repository_url        = "${{ vars.ECR_REPOSITORY_URL }}"
 
             github_repo               = "${{ vars.REPO_NAME }}"
             github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
@@ -82,8 +84,10 @@ jobs:
             cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
             cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
             cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-            image_tag                 = "${{ env.IMAGE_TAG }}"
+
             aws_region                = "${{ env.AWS_REGION }}"
+            image_tag                 = "${{ env.IMAGE_TAG }}"
+            ecr_repository_url        = "${{ vars.ECR_REPOSITORY_URL }}"
 
             github_repo               = "${{ vars.REPO_NAME }}"
             github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
@@ -110,6 +114,7 @@ jobs:
           echo "Deployed image tag: ${{ github.sha }}" >> "$GITHUB_STEP_SUMMARY"
           echo "Health check passed: https://${{ vars.FULL_DOMAIN }}/health" >> "$GITHUB_STEP_SUMMARY"
           echo "App URL: https://${{ vars.FULL_DOMAIN }}" >> "$GITHUB_STEP_SUMMARY"
+
 
 
 
