@@ -1,5 +1,15 @@
-wweb:
+ui:
+  title: "Gatus - Service Health"
+  header: "ECS Fargate Health Dashboard"
+  theme: "dark"
+
+web:
+  address: "0.0.0.0"
   port: 8080
+
+storage:
+  type: memory
+  maximum-number-of-results: 200
 
 endpoints:
   - name: google
