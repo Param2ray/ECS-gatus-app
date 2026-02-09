@@ -140,7 +140,7 @@ ecs-production-healthcheck-service/
 │       ├── acm/
 │       └── domain/
 │
-├── terraform-bootstrap/       # One-time foundational resources
+├── terraform-bootstrap/       # One-time foundational resources (IAM, ECR, Terraform backend)
 │   ├── main.tf
 │   ├── provider.tf
 │   ├── variables.tf
