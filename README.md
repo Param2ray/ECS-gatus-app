@@ -239,13 +239,13 @@ ecs-production-healthcheck-service/
 
 ## Live Demo
 
-**Dashboard:**  
+**Health Dashboard:**  
 https://tm.paramjyot2ray.com
 
 **Health Endpoint:**  
 https://tm.paramjyot2ray.com/health
 
-> 📌 **Placeholder – add live demo screenshots or GIFs**
+![HealthDashboard_Gatus-GoogleChrome2026-02-0821-38-49-ezgif com-video-to-gif-converter](https://github.com/user-attachments/assets/0b31d164-bde4-4bf2-9e25-e23b50e5070f)
 
 ---
 
