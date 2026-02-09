@@ -1,11 +1,13 @@
 # ECS Fargate Health Monitoring Platform (AWS, Terraform, CI/CD)
 
-<strong>
-<span style="color:#FF9900;">AWS ECS Fargate</span> ·
-<span style="color:#7B42BC;">Terraform</span> ·
-<span style="color:#2088FF;">GitHub Actions</span> ·
-<span style="color:#2ECC71;">Gatus</span>
-</strong>
+![AWS ECS Fargate](https://img.shields.io/badge/AWS-ECS%20Fargate-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=FF9900)
+![Terraform IaC](https://img.shields.io/badge/Terraform-IaC-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=7B42BC)
+![GitHub Actions CI/CD](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=0A66C2)
+![Docker Containers](https://img.shields.io/badge/Docker-Containers-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=5BC0EB)
+![Security OIDC](https://img.shields.io/badge/Security-OIDC-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=2E7D32)
+![IAM Least Privilege](https://img.shields.io/badge/IAM-Least%20Privilege-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=FF6A00)
+
+
 
 A production-style container platform deployed on **AWS ECS Fargate**, using **Terraform** for infrastructure-as-code and **GitHub Actions** for secure CI/CD.  
 The application runs **Gatus** behind an **Application Load Balancer (ALB)** with **HTTPS and a custom domain**, providing real-time health monitoring for internal and external services.
