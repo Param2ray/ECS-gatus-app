@@ -1,4 +1,4 @@
-# ECS Fargate Health Monitoring Platform (AWS, Terraform, CI/CD)
+# Gatus Health Monitoring Platform on AWS ECS Fargate (AWS, Terraform, CI/CD)
 
 ![AWS ECS Fargate](https://img.shields.io/badge/AWS-ECS%20Fargate-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=FF9900)
 ![Terraform IaC](https://img.shields.io/badge/Terraform-IaC-6e6e6e?style=for-the-badge&labelColor=6e6e6e&color=7B42BC)
