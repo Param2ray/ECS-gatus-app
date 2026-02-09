@@ -11,7 +11,7 @@ endpoints:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 500"
 
-  # --- Self check ---
+  # --- Self check (inside the container) ---
   - name: gatus-self
     group: internal
     url: http://localhost:8080/health
@@ -19,7 +19,7 @@ endpoints:
     conditions:
       - "[STATUS] == 200"
 
-  # --- App homepage ---
+  # --- App (public) ---
   - name: tm-homepage
     group: app
     url: https://tm.paramjyot2ray.com/
@@ -28,26 +28,7 @@ endpoints:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 800"
 
-  # --- DNS checks ---
-  - name: dns-google
-    group: external
-    dns:
-      query-name: google.com
-      query-type: A
-    interval: 30s
-    conditions:
-      - "[DNS_RCODE] == NOERROR"
-
-  - name: dns-tm-domain
-    group: app
-    dns:
-      query-name: tm.paramjyot2ray.com
-      query-type: A
-    interval: 30s
-    conditions:
-      - "[DNS_RCODE] == NOERROR"
-
-  # --- Frontend ---
+  # --- Frontend (separate group for nicer dashboard) ---
   - name: tm-frontend
     group: frontend
     url: https://tm.paramjyot2ray.com/
@@ -56,20 +37,12 @@ endpoints:
       - "[STATUS] == 200"
       - "[RESPONSE_TIME] < 800"
 
-  # --- Backend ---
+  # --- Backend (health endpoint) ---
   - name: tm-backend
     group: backend
     url: https://tm.paramjyot2ray.com/health
     interval: 30s
     conditions:
       - "[STATUS] == 200"
-
-  # --- ICMP-style connectivity check ---
-  - name: icmp-ping
-    group: external
-    url: https://example.org
-    interval: 30s
-    conditions:
-      - "[CONNECTED] == true"
 
 
