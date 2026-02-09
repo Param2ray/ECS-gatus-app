@@ -161,6 +161,9 @@ ecs-production-healthcheck-service/
 - Pushes image to Amazon ECR  
 - Authenticates using GitHub OIDC (no static AWS keys)
 
+<img width="295" height="203" alt="build" src="https://github.com/user-attachments/assets/73294973-28db-4af8-a5f3-5182c7a3f024" />
+
+
 ### Terraform Deploy (`deploy.yml`)
 
 - Triggered manually via `workflow_dispatch`  
@@ -169,11 +172,16 @@ ecs-production-healthcheck-service/
 - Performs a post-deploy health check  
 - Pipeline fails if the service is unhealthy
 
+<img width="553" height="204" alt="deploy" src="https://github.com/user-attachments/assets/39ca41ce-6b80-41bf-91e0-1e36b29828e9" />
+
+
 ### Terraform Destroy (`destroy.yml`)
 
 - Manual, guarded teardown workflow  
 - Uses restricted IAM permissions  
 - Prevents accidental infrastructure deletion
+
+<img width="315" height="220" alt="destroy" src="https://github.com/user-attachments/assets/9b532c8e-75ba-4d11-9ea3-9cb6e2a7fdfa" />
 
 ---
 
