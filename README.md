@@ -183,6 +183,12 @@ ecs-production-healthcheck-service/
 
 <img width="315" height="220" alt="destroy" src="https://github.com/user-attachments/assets/9b532c8e-75ba-4d11-9ea3-9cb6e2a7fdfa" />
 
+### Security & Validation
+
+- **Trivy** is used during the Docker build pipeline to scan container images for known CVEs **before pushing to Amazon ECR**
+- **Checkov** is used to statically analyse Terraform code and validate infrastructure against security and best-practice policies
+- Failing scans prevent images or infrastructure changes from being promoted
+
 ---
 
 ## Containers & Runtime
