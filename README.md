@@ -12,6 +12,21 @@
 A production-style container platform deployed on **AWS ECS Fargate**, using **Terraform** for infrastructure-as-code and **GitHub Actions** for secure CI/CD.  
 The application runs **Gatus** behind an **Application Load Balancer (ALB)** with **HTTPS and a custom domain**, providing real-time health monitoring for internal and external services.
 
+
+The platform runs inside a custom AWS VPC and follows standard AWS reference architecture patterns:
+
+- Users access the platform via a custom domain over HTTPS
+- Traffic flows through Cloudflare to an Application Load Balancer
+- ECS Fargate runs the Gatus container in private subnets
+- NAT Gateway provides outbound-only internet access
+- Logs are streamed to CloudWatch
+- CI/CD pipelines build and deploy images automatically
+
+
+<p align="center">
+  <img src="./assets/architecture.png" alt="ECS Fargate Architecture Diagram" width="900" />
+</p>
+
 ---
 
 ## Table of Contents
@@ -20,7 +35,6 @@ The application runs **Gatus** behind an **Application Load Balancer (ALB)** wit
 - [Tech Stack](#tech-stack)
 - [Design Priorities](#design-priorities)
 - [Architecture Overview](#architecture-overview)
-- [Architecture Diagram](#architecture-diagram)
 - [Repository Structure](#repository-structure)
 - [CI/CD Workflow](#cicd-workflow)
 - [Containers & Runtime](#containers--runtime)
@@ -90,6 +104,7 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 
 ## Architecture Overview
 
+
 The platform runs inside a custom AWS VPC and follows standard AWS reference architecture patterns:
 
 - Users access the platform via a custom domain over HTTPS
@@ -101,11 +116,6 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 
 ---
 
-## Architecture Diagram
-
-![ECS Fargate Architecture Diagram](assets/architecture.png)
-
----
 
 ## Repository Structure
 
