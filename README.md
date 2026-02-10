@@ -103,7 +103,7 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 
 ## Architecture Diagram
 
-> 📌 **Placeholder – add your final architecture diagram here**
+![ECS Fargate Architecture Diagram](assets/architecture.png)
 
 ---
 
