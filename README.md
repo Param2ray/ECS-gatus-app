@@ -33,6 +33,7 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 
 - [Overview](#overview)
 - [Tech Stack](#tech-stack)
+- [Local Development](#local-development)
 - [Design Priorities](#design-priorities)
 - [Architecture Overview](#architecture-overview)
 - [Repository Structure](#repository-structure)
@@ -91,6 +92,32 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 
 ---
 
+## Local Development
+
+Before containerising or deploying to AWS, the application was verified locally.
+
+### Run directly (Go)
+
+```bash
+cd app
+go run .
+Verify the health endpoint:
+
+curl http://localhost:8080/health
+Expected response:
+
+{"status":"ok"}
+Run with Docker
+Build the image:
+
+docker build -t gatus-local -f Docker/Dockerfile .
+Run the container:
+
+docker run -p 8080:8080 gatus-local
+Verify:
+
+curl http://localhost:8080/health
+```
 ## Design Priorities
 
 - Infrastructure defined as code (no ClickOps drift)
