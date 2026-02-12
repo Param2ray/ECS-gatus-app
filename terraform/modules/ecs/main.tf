@@ -1,15 +1,12 @@
-# 1) Read the existing SSM parameter you created manually
 data "aws_ssm_parameter" "ecs_secrets" {
   name = "ecs_secrets"
 }
 
-# Optional but recommended: create the log group used by awslogs
 resource "aws_cloudwatch_log_group" "ecs" {
   name              = "/ecs/${var.cluster_name}"
   retention_in_days = 7
 }
 
-# 4) Security group for ECS tasks
 resource "aws_security_group" "ecs_sg" {
   name        = "ecs_sg"
   description = "Allow HTTP traffic from the load balancer"
@@ -30,7 +27,6 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
-# 5) ECS Cluster
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = var.cluster_name
 
@@ -40,7 +36,6 @@ resource "aws_ecs_cluster" "ecs_cluster" {
   }
 }
 
-# 6) ECS Task Definition
 resource "aws_ecs_task_definition" "ecs_task" {
   family                   = var.task_family
   requires_compatibilities = ["FARGATE"]
@@ -91,7 +86,6 @@ resource "aws_ecs_task_definition" "ecs_task" {
   ]
 }
 
-# 7) ECS Service
 resource "aws_ecs_service" "ecs_service" {
   name            = "project_ecs_service"
   cluster         = aws_ecs_cluster.ecs_cluster.id
