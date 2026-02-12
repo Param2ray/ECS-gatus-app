@@ -1,15 +1,10 @@
-name: Terraform Deploy
+name: Terraform Apply
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "terraform/**"
-      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 concurrency:
-  group: terraform-deploy
+  group: terraform-apply
   cancel-in-progress: true
 
 permissions:
@@ -24,7 +19,7 @@ env:
 
 jobs:
   terraform:
-    name: Terraform Deploy
+    name: Terraform Apply
     runs-on: ubuntu-latest
 
     steps:
@@ -55,24 +50,6 @@ jobs:
         uses: dflook/terraform-validate@v2
         with:
           path: terraform
-
-      - name: Terraform plan
-        uses: dflook/terraform-plan@v2
-        with:
-          path: terraform
-          refresh: false
-          variables: |
-            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-
-            aws_region                = "${{ env.AWS_REGION }}"
-            image_tag                 = "${{ env.IMAGE_TAG }}"
-            ecr_repository_url        = "${{ vars.ECR_REPOSITORY_URL }}"
-
-            github_repo               = "${{ vars.REPO_NAME }}"
-            github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
-            lock_table_name           = "${{ vars.LOCK_TABLE_NAME }}"
 
       - name: Terraform apply
         uses: dflook/terraform-apply@v2

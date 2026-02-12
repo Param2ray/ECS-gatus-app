@@ -9,7 +9,12 @@ on:
       - "app/**"
       - "config/**"
       - "Docker/**"
+  workflow_dispatch:
 
+concurrency:
+  group: build-scan-push
+  cancel-in-progress: true
+  
 permissions:
   id-token: write
   contents: read

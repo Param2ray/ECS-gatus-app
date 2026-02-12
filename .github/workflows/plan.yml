@@ -1,0 +1,61 @@
+name: Terraform Plan
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: terraform-plan
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ca-central-1
+  IMAGE_TAG: ${{ github.sha }}
+  TF_VAR_image_tag: ${{ github.sha }}
+
+jobs:
+  terraform_plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Run Checkov (IaC scan)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: terraform
+          soft_fail: true
+
+      - name: Terraform validate
+        uses: dflook/terraform-validate@v2
+        with:
+          path: terraform
+
+      - name: Terraform plan
+        uses: dflook/terraform-plan@v2
+        with:
+          path: terraform
+          refresh: false
+          variables: |
+            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
+            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
+            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
+
+            aws_region                = "${{ env.AWS_REGION }}"
+            image_tag                 = "${{ env.IMAGE_TAG }}"
+            ecr_repository_url        = "${{ vars.ECR_REPOSITORY_URL }}"
+
+            github_repo               = "${{ vars.REPO_NAME }}"
+            github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
+            lock_table_name           = "${{ vars.LOCK_TABLE_NAME }}"
