@@ -9,23 +9,26 @@ resource "aws_cloudwatch_log_group" "ecs" {
 
 resource "aws_security_group" "ecs_sg" {
   name        = "ecs_sg"
-  description = "Allow HTTP traffic from the load balancer"
+  description = "ECS service security group"
   vpc_id      = var.vpc_id
-
-  ingress {
-    from_port       = var.container_port
-    to_port         = var.container_port
-    protocol        = "tcp"
-    security_groups = [var.alb_security_group_id]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
 }
+
+resource "aws_vpc_security_group_ingress_rule" "ecs_from_alb" {
+  security_group_id            = aws_security_group.ecs_sg.id
+  from_port                    = var.container_port
+  to_port                      = var.container_port
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = var.alb_security_group_id
+  description                  = "Allow traffic from ALB to ECS task"
+}
+
+resource "aws_vpc_security_group_egress_rule" "ecs_outbound" {
+  security_group_id = aws_security_group.ecs_sg.id
+  ip_protocol       = "-1"
+  cidr_ipv4         = "0.0.0.0/0"
+  description       = "Allow outbound traffic"
+}
+
 
 resource "aws_ecs_cluster" "ecs_cluster" {
   name = var.cluster_name
