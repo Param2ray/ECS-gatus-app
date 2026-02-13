@@ -94,34 +94,45 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 
 ## Local Development
 
-Before containerising or deploying to AWS, the application was verified locally to ensure it functioned correctly independent of cloud infrastructure.
+This project uses the open-source Gatus monitoring engine:
 
-### Run Directly (Go)
+https://github.com/TwiN/gatus
+
+### 1️⃣ Clone this repository
 
 ```bash
+git clone https://github.com/Param2ray/ecs-production-healthcheck-service.git
+cd ecs-production-healthcheck-service
+```
+Run locally (Go)
+
 cd app
+go mod download
 go run .
-```
-Verify the health endpoint:
-```
-curl http://localhost:8080/health
-```
-Expected response:
-```
-{"status":"UP"}
-```
-Run with Docker
-Build the image:
-```
-docker build -t gatus-local -f Docker/Dockerfile .
-```
-Run the container:
-```
-docker run -p 8080:8080 gatus-local
-```
+
 Verify:
-```
+
 curl http://localhost:8080/health
+
+Expected response:
+
+{"status":"UP"}
+
+Run locally with Docker
+
+Build:
+
+docker build -t gatus-local -f Docker/Dockerfile .
+
+Run:
+
+docker run -p 8080:8080 gatus-local
+
+Verify:
+
+curl http://localhost:8080/health
+
+
 ```
 ## Design Priorities
 
@@ -145,100 +156,127 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 - Health checks monitor frontend, backend, internal, and external services
 - Logs are streamed to CloudWatch
 - CI/CD pipelines build and deploy images automatically
-
----
-
-
+```
+```md
 ## Repository Structure
 
 ```text
 ecs-production-healthcheck-service/
 ├── .github/
 │   └── workflows/
-│       ├── build.yml          # Build + scan + push to ECR
-│       ├── deploy.yml         # Terraform apply + health check
-│       └── destroy.yml        # Controlled teardown
+│       ├── build.yml          # Docker build, scan & push to ECR
+│       ├── plan.yml           # Terraform plan (manual)
+│       ├── apply.yml          # Terraform apply + health check
+│       └── destroy.yml        # Guarded teardown workflow
 │
 ├── app/                       # Gatus application source
-│
 ├── config/                    # Gatus health check configuration
 │
 ├── Docker/
 │   ├── Dockerfile             # Multi-stage Docker build
 │   └── .dockerignore
 │
-├── terraform/                 # Runtime infrastructure
+├── terraform/
 │   ├── main.tf
-│   ├── provider.tf
+│   ├── providers.tf
 │   ├── variables.tf
 │   ├── outputs.tf
-│   ├── terraform.tfvars
-│   ├── terraform.auto.tfvars
 │   ├── versions.tf
 │   └── modules/
 │       ├── vpc/
 │       ├── alb/
 │       ├── ecs/
+│       ├── iam/
 │       ├── acm/
 │       └── domain/
 │
-├── terraform-bootstrap/       # One-time foundational resources (IAM, ECR, Terraform backend)
-│   ├── main.tf
-│   ├── provider.tf
-│   ├── variables.tf
-│   ├── outputs.tf
-│   ├── terraform.tfvars
-│   └── versions.tf
-│
-├── README.md
-└── .gitignore
+├── terraform-bootstrap/       # Backend + foundational resources
+└── README.md
+
 ```
-## CI/CD Workflow
-
-### Docker Build & Push (`build.yml`)
-
-- Triggered on application changes  
-- Builds a multi-stage Docker image  
-- Tags image with commit SHA  
-- Pushes image to Amazon ECR  
-- Authenticates using GitHub OIDC (no static AWS keys)
-
-<img width="295" height="203" alt="build" src="https://github.com/user-attachments/assets/73294973-28db-4af8-a5f3-5182c7a3f024" />
-
-
-### Terraform Deploy (`deploy.yml`)
-
-- Triggered manually via `workflow_dispatch`  
-- Applies infrastructure changes using Terraform  
-- Deploys the latest container image  
-- Performs a post-deploy health check  
-- Pipeline fails if the service is unhealthy
-
-<img width="553" height="204" alt="deploy" src="https://github.com/user-attachments/assets/39ca41ce-6b80-41bf-91e0-1e36b29828e9" />
-
-
-### Terraform Destroy (`destroy.yml`)
-
-- Manual, guarded teardown workflow  
-- Uses restricted IAM permissions  
-- Prevents accidental infrastructure deletion
-
-<img width="315" height="220" alt="destroy" src="https://github.com/user-attachments/assets/9b532c8e-75ba-4d11-9ea3-9cb6e2a7fdfa" />
-
-### Security & Validation
-
-- **Trivy** is used during the Docker build pipeline to scan container images for known CVEs **before pushing to Amazon ECR**
-- **Checkov** is used to statically analyse Terraform code and validate infrastructure against security and best-practice policies
-- Failing scans prevent images or infrastructure changes from being promoted
 
 ---
 
+# 🔹 Updated: CI/CD Workflow Section
+
+```md
+## CI/CD Workflow
+
+All pipelines authenticate to AWS using GitHub OIDC federation.  
+No static AWS credentials are stored in GitHub.
+
+---
+
+### 🐳 Docker Build & Push (`build.yml`)
+
+- Triggered on application changes
+- Builds multi-stage Docker image
+- Tags image with commit SHA
+- Scans image with **Trivy**
+- Pushes image to Amazon ECR
+- Fails on HIGH/CRITICAL vulnerabilities
+
+---
+
+### 📝 Terraform Plan (`plan.yml`)
+
+- Manual trigger (`workflow_dispatch`)
+- Runs **Checkov** for security validation
+- Validates Terraform configuration
+- Generates execution plan for review
+
+---
+
+### 🚀 Terraform Apply (`apply.yml`)
+
+- Manual trigger
+- Verifies container image exists in ECR
+- Applies infrastructure changes
+- Deploys latest image
+- Performs automated health check
+- Pipeline fails if service is unhealthy
+
+---
+
+### 🔥 Terraform Destroy (`destroy.yml`)
+
+- Manual guarded teardown
+- Requires confirmation input ("DESTROY")
+- Uses restricted IAM permissions
+- Prevents accidental infrastructure deletion
+
+---
+
+### 🔐 Security & Validation
+
+- **Trivy** scans container images before push
+- **Checkov** validates Terraform security posture
+- Failing scans prevent promotion to production
+
+
+```
+```
 ## Containers & Runtime
 
-- Multi-stage Docker build for minimal runtime image  
-- Non-root user enforced inside the container  
-- Reduced attack surface by excluding unnecessary tooling  
+- Multi-stage Docker build
+- Minimal runtime image
+- Non-root container execution
+- Reduced attack surface
 - Optimised for ECS Fargate execution
+
+### 📊 Docker Optimisation Result
+
+Baseline image: **2.55GB**  
+Optimised image: **80.4MB**
+
+**2.55GB → 80.4MB (~97% reduction)**
+
+Achieved using:
+- Multi-stage build
+- Distroless-style runtime
+- Removal of unnecessary tooling
+- Smaller attack surface
+
 
 ---
 
