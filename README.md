@@ -309,7 +309,7 @@ Achieved using:
   - Internal  
 - ECS task logs shipped to CloudWatch  
 - No manual logging configuration required  
-
+---
 <img width="1920" height="1032" alt="1 dashboard" src="https://github.com/user-attachments/assets/1525dcf3-6560-4932-96b5-2e53d533ae7a" />
 <img width="1920" height="1032" alt="2 dashboard" src="https://github.com/user-attachments/assets/a484580e-4466-41c7-8aea-3f542262be4c" />
 <img width="1920" height="1032" alt="3 dashboard" src="https://github.com/user-attachments/assets/c24ae7e4-ff17-43a4-80da-979d14ece70a" />
