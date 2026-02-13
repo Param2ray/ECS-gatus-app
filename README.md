@@ -95,45 +95,43 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 ## Local Development
 
 This project uses the open-source Gatus monitoring engine:
-
+```
 https://github.com/TwiN/gatus
-
-### 1️⃣ Clone this repository
+```
+### Clone this repository
 
 ```bash
 git clone https://github.com/Param2ray/ecs-production-healthcheck-service.git
 cd ecs-production-healthcheck-service
 ```
-Run locally (Go)
-
+### Run locally (Go)
+```
 cd app
 go mod download
 go run .
-
+```
 Verify:
-
+```
 curl http://localhost:8080/health
-
+```
 Expected response:
-
+```
 {"status":"UP"}
-
-Run locally with Docker
-
-Build:
-
-docker build -t gatus-local -f Docker/Dockerfile .
-
-Run:
-
-docker run -p 8080:8080 gatus-local
-
-Verify:
-
-curl http://localhost:8080/health
-
+```
+### Run locally with Docker
 
 ```
+docker build -t gatus-local -f Docker/Dockerfile .
+```
+```
+docker run -p 8080:8080 gatus-local
+```
+Verify:
+```
+curl http://localhost:8080/health
+```
+
+
 ## Design Priorities
 
 - Infrastructure defined as code (no ClickOps drift)
@@ -147,7 +145,6 @@ curl http://localhost:8080/health
 
 ## Architecture Overview
 
-
 The platform runs inside a custom AWS VPC and follows standard AWS reference architecture patterns:
 
 - Users access the platform via a custom domain over HTTPS
@@ -156,32 +153,35 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 - Health checks monitor frontend, backend, internal, and external services
 - Logs are streamed to CloudWatch
 - CI/CD pipelines build and deploy images automatically
-```
-```md
-## Repository Structure
+---
 
-```text
+## Repository Structure
+```
 ecs-production-healthcheck-service/
 ├── .github/
 │   └── workflows/
-│       ├── build.yml          # Docker build, scan & push to ECR
-│       ├── plan.yml           # Terraform plan (manual)
-│       ├── apply.yml          # Terraform apply + health check
-│       └── destroy.yml        # Guarded teardown workflow
+│       ├── build.yml            # Docker build, scan & push to ECR
+│       ├── plan.yml             # Terraform plan (manual)
+│       ├── apply.yml            # Terraform apply + post-deploy health check
+│       └── destroy.yml          # Guarded teardown workflow
 │
-├── app/                       # Gatus application source
-├── config/                    # Gatus health check configuration
+├── assets/
+│   └── architecture.png         # Architecture diagram
+│
+├── app/                         # Gatus application source
+│
+├── config/                      # Gatus health check configuration
 │
 ├── Docker/
-│   ├── Dockerfile             # Multi-stage Docker build
+│   ├── Dockerfile               # Multi-stage Docker build (optimized)
 │   └── .dockerignore
 │
-├── terraform/
+├── terraform/                   # Runtime infrastructure
 │   ├── main.tf
-│   ├── providers.tf
+│   ├── provider.tf
 │   ├── variables.tf
-│   ├── outputs.tf
-│   ├── versions.tf
+│   ├── terraform.tfvars
+│   ├── terraform.auto.tfvars
 │   └── modules/
 │       ├── vpc/
 │       ├── alb/
@@ -190,16 +190,19 @@ ecs-production-healthcheck-service/
 │       ├── acm/
 │       └── domain/
 │
-├── terraform-bootstrap/       # Backend + foundational resources
-└── README.md
+├── terraform-bootstrap/         # One-time foundational resources (IAM, ECR, S3 backend)
+│   ├── main.tf
+│   ├── variables.tf
+│   ├── outputs.tf
+│   ├── terraform.tfvars
+│   └── versions.tf
+│
+├── README.md
+└── .gitignore
 
 ```
 
 ---
-
-# 🔹 Updated: CI/CD Workflow Section
-
-```md
 ## CI/CD Workflow
 
 All pipelines authenticate to AWS using GitHub OIDC federation.  
@@ -207,7 +210,7 @@ No static AWS credentials are stored in GitHub.
 
 ---
 
-### 🐳 Docker Build & Push (`build.yml`)
+### Docker Build & Push (`build.yml`)
 
 - Triggered on application changes
 - Builds multi-stage Docker image
@@ -218,7 +221,7 @@ No static AWS credentials are stored in GitHub.
 
 ---
 
-### 📝 Terraform Plan (`plan.yml`)
+### Terraform Plan (`plan.yml`)
 
 - Manual trigger (`workflow_dispatch`)
 - Runs **Checkov** for security validation
@@ -227,7 +230,7 @@ No static AWS credentials are stored in GitHub.
 
 ---
 
-### 🚀 Terraform Apply (`apply.yml`)
+### Terraform Apply (`apply.yml`)
 
 - Manual trigger
 - Verifies container image exists in ECR
@@ -238,7 +241,7 @@ No static AWS credentials are stored in GitHub.
 
 ---
 
-### 🔥 Terraform Destroy (`destroy.yml`)
+### Terraform Destroy (`destroy.yml`)
 
 - Manual guarded teardown
 - Requires confirmation input ("DESTROY")
@@ -247,15 +250,13 @@ No static AWS credentials are stored in GitHub.
 
 ---
 
-### 🔐 Security & Validation
+### Security & Validation
 
 - **Trivy** scans container images before push
 - **Checkov** validates Terraform security posture
 - Failing scans prevent promotion to production
 
-
-```
-```
+---
 ## Containers & Runtime
 
 - Multi-stage Docker build
@@ -264,7 +265,7 @@ No static AWS credentials are stored in GitHub.
 - Reduced attack surface
 - Optimised for ECS Fargate execution
 
-### 📊 Docker Optimisation Result
+### Docker Optimisation Result
 
 Baseline image: **2.55GB**  
 Optimised image: **80.4MB**
