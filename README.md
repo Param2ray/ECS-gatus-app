@@ -219,6 +219,9 @@ No static AWS credentials are stored in GitHub.
 - Pushes image to Amazon ECR
 - Fails on HIGH/CRITICAL vulnerabilities
 
+<img width="295" height="203" alt="build" src="https://github.com/user-attachments/assets/03c5b6ae-78ee-4ca2-8549-8ec3ba3fc809" />
+
+
 ---
 
 ### Terraform Plan (`plan.yml`)
@@ -227,6 +230,9 @@ No static AWS credentials are stored in GitHub.
 - Runs **Checkov** for security validation
 - Validates Terraform configuration
 - Generates execution plan for review
+
+<img width="326" height="216" alt="plan" src="https://github.com/user-attachments/assets/7b3abb32-99cc-4cf6-b965-cc108ed71926" />
+
 
 ---
 
@@ -239,6 +245,9 @@ No static AWS credentials are stored in GitHub.
 - Performs automated health check
 - Pipeline fails if service is unhealthy
 
+<img width="610" height="233" alt="apply" src="https://github.com/user-attachments/assets/0b533208-c72e-4cb9-8f96-97bb25334aa4" />
+
+
 ---
 
 ### Terraform Destroy (`destroy.yml`)
@@ -247,6 +256,9 @@ No static AWS credentials are stored in GitHub.
 - Requires confirmation input ("DESTROY")
 - Uses restricted IAM permissions
 - Prevents accidental infrastructure deletion
+
+<img width="315" height="220" alt="destroy" src="https://github.com/user-attachments/assets/aae8bebe-5349-455c-b46c-e63704f478c5" />
+
 
 ---
 
