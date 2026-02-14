@@ -58,4 +58,3 @@ jobs:
 
             github_repo               = "${{ vars.REPO_NAME }}"
             github_actions_role_name  = "${{ vars.ACTIONS_ROLE_NAME }}"
-            lock_table_name           = "${{ vars.LOCK_TABLE_NAME }}"
