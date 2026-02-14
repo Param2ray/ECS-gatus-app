@@ -75,7 +75,10 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 ### Infrastructure as Code
 - Terraform
 - Modular Terraform design
-- S3 backend with DynamoDB state locking
+- Remote state stored in Amazon S3 (backend)
+- State locking enabled using S3 lockfile (`use_lockfile = true`)
+- Bootstrap stack provisions foundational resources (IAM, ECR, S3 backend)
+
 
 ### CI/CD
 - GitHub Actions
@@ -306,8 +309,8 @@ Achieved using:
 
 - Modular Terraform structure for clarity and reuse  
 - Remote state stored in Amazon S3  
-- DynamoDB used for state locking  
-- Bootstrap stack provisions backend resources
+- State locking enabled using S3 lockfile (`use_lockfile = true`)  
+- Bootstrap stack provisions foundational resources (IAM, ECR, S3 backend bucket)  
 
 ---
 
