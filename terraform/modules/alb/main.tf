@@ -70,7 +70,7 @@ resource "aws_lb_listener" "project_alb_listeners" {
   port              = var.http_listener_port
 
   default_action {
-    type             = "redirect"
+    type = "redirect"
     redirect {
       protocol    = "HTTPS"
       port        = var.https_listener_port
