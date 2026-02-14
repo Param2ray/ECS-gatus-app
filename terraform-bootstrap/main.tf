@@ -37,44 +37,6 @@ resource "aws_iam_role" "github_actions" {
   })
 }
 
-resource "aws_iam_policy" "terraform_backend" {
-  name        = "terraform-backend-access"
-  description = "Access to Terraform S3 state and DynamoDB lock table"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid      = "StateBucketList"
-        Effect   = "Allow"
-        Action   = ["s3:ListBucket"]
-        Resource = "arn:aws:s3:::${var.state_bucket}"
-      },
-      {
-        Sid    = "StateObjectRW"
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:PutObject",
-          "s3:DeleteObject"
-        ]
-        Resource = "arn:aws:s3:::${var.state_bucket}/*"
-      },
-      {
-        Sid    = "TerraformLockTable"
-        Effect = "Allow"
-        Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:DeleteItem",
-          "dynamodb:DescribeTable"
-        ]
-        Resource = var.lock_table_arn
-      }
-    ]
-  })
-}
-
 resource "aws_iam_role_policy_attachment" "attach_backend_policy" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.terraform_backend.arn
@@ -292,4 +254,66 @@ resource "aws_ecr_repository" "gatus_app" {
   lifecycle {
     prevent_destroy = true
   }
+}
+
+resource "aws_s3_bucket" "tf_state" {
+  bucket = var.state_bucket
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "aws_s3_bucket_versioning" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resource "aws_s3_bucket_public_access_block" "tf_state" {
+  bucket = aws_s3_bucket.tf_state.id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  ignore_public_acls      = true
+  restrict_public_buckets = true
+}
+
+resource "aws_iam_policy" "terraform_backend" {
+  name        = "terraform-backend-access"
+  description = "Access to Terraform S3 state (lockfile enabled)"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "StateBucketList"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::${var.state_bucket}"
+      },
+      {
+        Sid    = "StateObjectRW"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::${var.state_bucket}/*"
+      }
+    ]
+  })
 }

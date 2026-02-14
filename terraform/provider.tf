@@ -1,5 +1,5 @@
 terraform {
-  required_version = ">= 1.9.8"
+  required_version = ">= 1.10.0"
 
   required_providers {
     # AWS Provider
@@ -17,11 +17,11 @@ terraform {
 
   # S3 Backend Configuration
   backend "s3" {
-    bucket         = "ece-production-healthcheck-service"
-    key            = "terraform.tfstate"
-    region         = "ca-central-1"
-    encrypt        = true
-    dynamodb_table = "terraform-state-lock"
+    bucket       = "ecs-production-healthcheck-service"
+    key          = "terraform.tfstate"
+    region       = "ca-central-1"
+    encrypt      = true
+    use_lockfile = true
   }
 }
 

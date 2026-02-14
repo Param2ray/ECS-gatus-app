@@ -172,10 +172,6 @@ variable "github_actions_role_name" {
   type        = string
 }
 
-variable "lock_table_name" {
-  type = string
-}
-
 variable "manage_iam" {
   description = "If true, Terraform will create/manage IAM resources (bootstrap only). Keep false for runtime deploy."
   type        = bool
