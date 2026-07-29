@@ -14,4 +14,4 @@ subdomain                 = "tm"
 task_name                 = "gatus-task"
 vpc_cidr                  = "10.0.0.0/16"
 task_family               = "gatus-task"
-manage_validation_records = false
+manage_validation_records = true

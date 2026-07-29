@@ -55,6 +55,10 @@ module "ecs" {
   execution_role_name   = "ecsTaskExecutionRole"
   ecr_repository_url    = var.ecr_repository_url
   image_tag             = var.image_tag
+
+  depends_on = [
+    module.alb
+  ]
 }
 
 data "aws_ssm_parameter" "ecs_secrets" {

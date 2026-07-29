@@ -28,11 +28,12 @@ resource "cloudflare_dns_record" "acm_cert_validation" {
 }
 
 resource "aws_acm_certificate_validation" "cert_validation" {
-  count           = var.manage_validation_records ? 1 : 0
+  count = var.manage_validation_records ? 1 : 0
+
   certificate_arn = aws_acm_certificate.cert.arn
 
   validation_record_fqdns = [
-    for record in cloudflare_dns_record.acm_cert_validation : record.hostname
+    for record in cloudflare_dns_record.acm_cert_validation : record.name
   ]
 }
 
