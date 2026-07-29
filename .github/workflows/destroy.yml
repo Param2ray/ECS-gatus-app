@@ -54,9 +54,6 @@ jobs:
             availability_zones        = ${{ vars.TF_AVAILABILITY_ZONES }}
             public_subnet_cidrs       = ${{ vars.TF_PUBLIC_SUBNET_CIDRS }}
             private_subnet_cidrs      = ${{ vars.TF_PRIVATE_SUBNET_CIDRS }}
-
-            domain_name               = "${{ vars.TF_DOMAIN_NAME }}"
-            subdomain                 = "${{ vars.TF_SUBDOMAIN }}"
             container_name            = "${{ vars.TF_CONTAINER_NAME }}"
             cluster_name              = "${{ vars.TF_CLUSTER_NAME }}"
             task_family               = "${{ vars.TF_TASK_FAMILY }}"
