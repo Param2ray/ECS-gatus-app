@@ -23,3 +23,8 @@ output "alb_sg_id" {
   value       = aws_security_group.sg_alb.id
 }
 
+output "alb_zone_id" {
+  description = "The canonical hosted zone ID of the ALB"
+  value       = aws_lb.application_lb.zone_id
+}
+

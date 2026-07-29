@@ -7,6 +7,6 @@ output "acm_certificate_arn" {
 }
 
 output "domain_validation_options" {
-  description = "ACM DNS validation options (record name/type/value)"
+  description = "ACM DNS validation options"
   value       = aws_acm_certificate.cert.domain_validation_options
 }

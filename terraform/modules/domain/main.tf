@@ -1,8 +1,18 @@
-# Setting up CNAME record
-resource "cloudflare_dns_record" "ecs_record" {
-  zone_id = var.cloudflare_zone_id
-  name    = var.subdomain
-  type    = var.record_type
-  content = var.alb_dns
-  ttl     = var.time_to_live
+# Look up the existing delegated Route 53 hosted zone
+data "aws_route53_zone" "this" {
+  name         = var.hosted_zone_name
+  private_zone = false
+}
+
+# Route the ECS domain to the Application Load Balancer
+resource "aws_route53_record" "ecs" {
+  zone_id = data.aws_route53_zone.this.zone_id
+  name    = var.record_name
+  type    = "A"
+
+  alias {
+    name                   = var.alb_dns_name
+    zone_id                = var.alb_zone_id
+    evaluate_target_health = true
+  }
 }

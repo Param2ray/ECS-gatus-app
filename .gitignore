@@ -1,13 +1,17 @@
-#local.terraform directories
+# Local Terraform directories
 **/.terraform/*
 
-# .tfstate files
+# Terraform state
 **/*.tfstate
 **/*.tfstate.*
-**/*.lock.hcl
+
+# Secrets
 **/*.tfvars
 **/*.env
-terraform/.terraform.lock.hcl
+
+# Local backups
+terraform-state-backup-before-cloudflare-cleanup.json
+terraform/state-backup-*.json
 
 # Allow committing this one non-secret tfvars file for CI/CD
-!terraform/terraform.auto.tfvarsterraform/state-backup-*.json
+!terraform/terraform.auto.tfvars

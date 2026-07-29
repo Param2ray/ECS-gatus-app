@@ -1,3 +1,4 @@
 output "record_hostname" {
-  value = "${cloudflare_dns_record.ecs_record.name}.${var.zone_name}"
+  description = "The fully qualified ECS domain name"
+  value       = aws_route53_record.ecs.fqdn
 }

@@ -113,9 +113,9 @@ variable "ttl" {
 }
 
 variable "manage_validation_records" {
-  description = "Whether Terraform should create Cloudflare DNS validation records for ACM."
+  description = "Whether Terraform should create Route 53 DNS validation records for ACM"
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "container_name" {

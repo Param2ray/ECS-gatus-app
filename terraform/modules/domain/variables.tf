@@ -1,30 +1,19 @@
-variable "alb_dns" {
-  description = "DNS name of the ALB"
+variable "hosted_zone_name" {
+  description = "Existing Route 53 hosted zone name"
   type        = string
 }
 
-variable "cloudflare_zone_id" {
-  description = "Cloudflare Hosted Zone ID"
+variable "record_name" {
+  description = "Fully qualified ECS application domain"
   type        = string
 }
 
-variable "subdomain" {
-  description = "Subdomain to create DNS record for"
+variable "alb_dns_name" {
+  description = "Application Load Balancer DNS name"
   type        = string
 }
 
-variable "record_type" {
-  type    = string
-  default = "CNAME"
-}
-
-variable "time_to_live" {
-  type        = number
-  description = "Time to Live"
-  default     = 300
-}
-
-variable "zone_name" {
-  description = "Base domain name"
+variable "alb_zone_id" {
+  description = "Application Load Balancer canonical hosted zone ID"
   type        = string
 }

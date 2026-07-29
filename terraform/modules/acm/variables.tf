@@ -1,31 +1,26 @@
 variable "domain_name" {
-  description = "Domain name for ACM certificate"
-  type        = string
-}
-
-variable "cloudflare_zone_id" {
-  description = "The Cloudflare zone ID"
+  description = "Parent domain name"
   type        = string
 }
 
 variable "subdomain" {
-  description = "Subdomain for ACM certificate"
+  description = "Subdomain used for the ACM certificate"
+  type        = string
+}
+
+variable "hosted_zone_name" {
+  description = "Existing Route 53 hosted zone name"
   type        = string
 }
 
 variable "ttl" {
-  description = "TTL for ACM validation DNS record"
+  description = "TTL for ACM validation DNS records"
   type        = number
   default     = 300
 }
 
-variable "zone_name" {
-  description = "Base domain name (Cloudflare zone), e.g. paramjyot2ray.com"
-  type        = string
-}
-
 variable "manage_validation_records" {
-  description = "Whether Terraform should create DNS validation records in Cloudflare for ACM."
+  description = "Whether Terraform should create Route 53 validation records for ACM"
   type        = bool
   default     = true
 }

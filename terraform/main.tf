@@ -14,9 +14,8 @@ module "acm" {
 
   domain_name               = var.domain_name
   subdomain                 = var.subdomain
+  hosted_zone_name          = "${var.subdomain}.${var.domain_name}"
   ttl                       = var.ttl
-  cloudflare_zone_id        = var.cloudflare_zone_id
-  zone_name                 = var.zone_name
   manage_validation_records = var.manage_validation_records
 }
 
@@ -31,7 +30,6 @@ module "alb" {
   https_listener_port = var.https_listener_port
   certificate_arn     = module.acm.acm_certificate_arn
   container_port      = var.container_port
-
 }
 
 module "ecs" {
@@ -68,9 +66,13 @@ data "aws_ssm_parameter" "ecs_secrets" {
 module "domain" {
   source = "./modules/domain"
 
-  alb_dns            = module.alb.alb_dns_name
-  cloudflare_zone_id = var.cloudflare_zone_id
-  subdomain          = var.subdomain
-  zone_name          = var.zone_name
+  hosted_zone_name = "${var.subdomain}.${var.domain_name}"
+  record_name      = "${var.subdomain}.${var.domain_name}"
+  alb_dns_name     = module.alb.alb_dns_name
+  alb_zone_id      = module.alb.alb_zone_id
+
+  depends_on = [
+    module.alb
+  ]
 }
  
