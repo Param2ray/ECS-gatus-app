@@ -48,10 +48,6 @@ jobs:
           path: terraform
           refresh: false
           variables: |
-            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
-
             aws_region                = "${{ env.AWS_REGION }}"
             image_tag                 = "${{ env.IMAGE_TAG }}"
             ecr_repository_url        = "${{ vars.ECR_REPOSITORY_URL }}"

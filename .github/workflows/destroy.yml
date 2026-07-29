@@ -42,9 +42,6 @@ jobs:
             module.acm
             module.domain
           variables: |
-            cloudflare_api_token      = "${{ secrets.CLOUDFLARE_API_TOKEN }}"
-            cloudflare_zone_id        = "${{ vars.CLOUDFLARE_ZONE_ID }}"
-            cloudflare_account_id     = "${{ vars.CLOUDFLARE_ACCOUNT_ID }}"
             aws_region                = "${{ vars.AWS_REGION }}"
             image_tag                 = "${{ github.sha }}"
 
@@ -60,7 +57,6 @@ jobs:
 
             domain_name               = "${{ vars.TF_DOMAIN_NAME }}"
             subdomain                 = "${{ vars.TF_SUBDOMAIN }}"
-            zone_name                 = "${{ vars.TF_ZONE_NAME }}"
             container_name            = "${{ vars.TF_CONTAINER_NAME }}"
             cluster_name              = "${{ vars.TF_CLUSTER_NAME }}"
             task_family               = "${{ vars.TF_TASK_FAMILY }}"
