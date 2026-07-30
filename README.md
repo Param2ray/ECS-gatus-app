@@ -23,7 +23,7 @@ The platform runs inside a custom AWS VPC and follows standard AWS reference arc
 - CI/CD pipelines build and deploy images automatically
 
 
-<img width="1062" height="1339" alt="ECS Architectural diagram drawio" src="https://github.com/user-attachments/assets/7ef0e1d0-9925-43ed-99cc-55ca564baf36" />
+<img width="1062" height="1343" alt="ECS Architectural diagram drawio" src="https://github.com/user-attachments/assets/ddbd4808-4d8d-4cb8-84ed-29a80b8e08e0" />
 
 ---
 
