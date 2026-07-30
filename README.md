@@ -16,7 +16,7 @@ The application runs **Gatus** behind an **Application Load Balancer (ALB)** wit
 The platform runs inside a custom AWS VPC and follows standard AWS reference architecture patterns:
 
 - Users access the platform via a custom domain over HTTPS
-- Traffic flows through Cloudflare to an Application Load Balancer
+- Traffic is resolved by Amazon Route 53 and routed to an Application Load Balancer over HTTPS
 - ECS Fargate runs the Gatus container in private subnets
 - NAT Gateway provides outbound-only internet access
 - Logs are streamed to CloudWatch
@@ -88,7 +88,8 @@ The emphasis is on **clarity, security, and operational correctness**, rather th
 - Non-root container runtime
 
 ### DNS & HTTPS
-- Cloudflare (DNS)
+- Amazon Route 53 (DNS)
+- AWS Certificate Manager (ACM)
 - Custom domain with HTTPS
 
 ---
@@ -148,12 +149,12 @@ curl http://localhost:8080/health
 
 The platform runs inside a custom AWS VPC and follows standard AWS reference architecture patterns:
 
-- Users access the platform via a custom domain over HTTPS
-- Traffic flows through an Application Load Balancer
-- ECS Fargate runs the Gatus container
-- Health checks monitor frontend, backend, internal, and external services
-- Logs are streamed to CloudWatch
-- CI/CD pipelines build and deploy images automatically
+- Users access the platform via a custom domain over HTTPS.
+- Amazon Route 53 resolves the domain and routes traffic to an Application Load Balancer.
+- The ALB terminates TLS using AWS Certificate Manager (ACM) and forwards requests to ECS Fargate tasks running in private subnets.
+- Health checks monitor frontend, backend, internal, and external services.
+- Logs are streamed to Amazon CloudWatch.
+- CI/CD pipelines build, scan, and deploy container images automatically using GitHub Actions.
 ---
 
 ## Repository Structure
@@ -267,7 +268,7 @@ No static AWS credentials are stored in GitHub.
 
 - **Trivy** scans container images before push
 - **Checkov** validates Terraform security posture
-- Failing scans prevent promotion to production
+- Security findings are surfaced during CI/CD for review
 
 ---
 ## Containers & Runtime
